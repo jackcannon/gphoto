@@ -2,6 +2,8 @@
 
 # Namespace: config
 
+A collection of functions for managing the configuration of a camera.
+
 ## Table of contents
 
 ### Functions

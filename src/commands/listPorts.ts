@@ -1,6 +1,7 @@
 import { runCmd } from '../utils/runCmd';
 import { readTable } from '../utils/readTable';
 
+// TODO docs
 export interface GPhotoListedPort {
   path: string;
   description: string;

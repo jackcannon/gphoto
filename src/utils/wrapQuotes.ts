@@ -1,6 +1,6 @@
 export const wrapQuotes = (pathStr: string) => {
   const escaped = pathStr
-    .replace(/'/g, "\\'")
+    .replace(/"/g, '\\"')
     .replace(/\n/g, '\\n')
     .replace(/\r/g, '\\r')
     .replace(/\t/g, '\\t')

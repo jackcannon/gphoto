@@ -22,31 +22,38 @@ __export(src_exports, {
   abilities: () => abilities,
   autoDetect: () => autoDetect,
   config: () => config_exports,
+  default: () => src_default,
   listCameras: () => listCameras,
   listPorts: () => listPorts,
   reset: () => reset
 });
 module.exports = __toCommonJS(src_exports);
 
-// src/utils/wrapQuotes.ts
-var wrapQuotes = (pathStr) => {
-  const escaped = pathStr.replace(/'/g, "\\'").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t").replace(/\f/g, "\\f").replace(/\\/g, "\\\\").replace(/\v/g, "\\v").replace(/\0/g, "\\0");
-  return `"${escaped}"`;
-};
+// src/gPhoto.ts
+var gPhoto_exports = {};
+__export(gPhoto_exports, {
+  abilities: () => abilities,
+  autoDetect: () => autoDetect,
+  config: () => config_exports,
+  listCameras: () => listCameras,
+  listPorts: () => listPorts,
+  reset: () => reset
+});
 
-// src/utils/identifiers.ts
-var getIdentifierFlags = (identifier) => {
-  if (!identifier)
-    return "";
-  let result = "";
-  if (identifier.port) {
-    result += ` --port ${wrapQuotes(identifier.port)}`;
-  }
-  if (identifier.model) {
-    result += ` --camera ${wrapQuotes(identifier.model)}`;
-  }
-  return result.trim();
-};
+// src/commands/config.ts
+var config_exports = {};
+__export(config_exports, {
+  get: () => get,
+  getAll: () => getAll,
+  getAllInfos: () => getAllInfos,
+  getAllValues: () => getAllValues,
+  getInfos: () => getInfos,
+  getSingle: () => getSingle,
+  getSingleInfo: () => getSingleInfo,
+  list: () => list,
+  set: () => set,
+  setSingle: () => setSingle
+});
 
 // src/utils/runCmd.ts
 var import_child_process = require("child_process");
@@ -70,82 +77,28 @@ var runCmd = (cmd) => new ProcessPromise(
   })
 );
 
-// src/commands/abilities.ts
-var parseValue = (value) => {
-  if (value === "")
-    return void 0;
-  if (value === "yes")
-    return true;
-  if (value === "no")
-    return false;
-  if (!Number.isNaN(Number(value)))
-    return Number(value);
-  return value;
+// src/utils/wrapQuotes.ts
+var wrapQuotes = (pathStr) => {
+  const escaped = pathStr.replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t").replace(/\f/g, "\\f").replace(/\\/g, "\\\\").replace(/\v/g, "\\v").replace(/\0/g, "\\0");
+  return `"${escaped}"`;
 };
-var parseAbilitiesTable = (out) => {
-  const pairs = out.split("\n").filter((line) => line.trim().length).map((line) => line.split(":").map((item) => item.trim())).filter((pair) => pair.length === 2);
-  let lastKey = "";
-  const result = {};
-  for (let [key, rawValue] of pairs) {
-    const value = parseValue(rawValue);
-    if (key)
-      lastKey = key;
-    if (key !== lastKey) {
-      if (!(result[lastKey] instanceof Array)) {
-        result[lastKey] = [result[lastKey]];
-      }
-      result[lastKey] = [...result[lastKey], value].filter((v) => v);
-    } else {
-      result[key] = value;
-    }
+
+// src/utils/identifiers.ts
+var getIdentifierFlags = (identifier) => {
+  if (!identifier)
+    return "";
+  let result = "";
+  if (identifier.port) {
+    result += ` --port ${wrapQuotes(identifier.port)}`;
   }
-  return result;
+  if (identifier.model) {
+    result += ` --camera ${wrapQuotes(identifier.model)}`;
+  }
+  return result.trim();
 };
-var abilities = async (identifier) => {
-  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --abilities `);
-  return parseAbilitiesTable(out);
-};
-
-// src/utils/readTable.ts
-var import_swiss_ak = require("swiss-ak");
-var readTable = (out, propertyNames) => {
-  const lines = out.split("\n");
-  const sepIndex = lines.findIndex((line) => line.trim().startsWith("-----"));
-  const head = lines[sepIndex - 1];
-  const rows = lines.slice(sepIndex + 1);
-  const readLine = (line) => line.trim().split(/\s{3,}/);
-  const properties = propertyNames || readLine(head).map((name) => name.toLowerCase().replace(/[^A-Za-z0-9]/g, "-"));
-  const objs = rows.filter((line) => line.trim().length).map((line) => {
-    const values = readLine(line);
-    return Object.fromEntries((0, import_swiss_ak.zip)(properties, values));
-  });
-  return objs;
-};
-
-// src/commands/autoDetect.ts
-var autoDetect = async () => {
-  const out = await runCmd("gphoto2 --auto-detect");
-  const cameras = readTable(out, ["model", "port"]);
-  return cameras;
-};
-
-// src/commands/config.ts
-var config_exports = {};
-__export(config_exports, {
-  get: () => get,
-  getAll: () => getAll,
-  getAllInfos: () => getAllInfos,
-  getAllValues: () => getAllValues,
-  getInfos: () => getInfos,
-  getSingle: () => getSingle,
-  getSingleInfo: () => getSingleInfo,
-  list: () => list,
-  set: () => set,
-  setSingle: () => setSingle
-});
 
 // src/utils/configCache.ts
-var import_swiss_ak2 = require("swiss-ak");
+var import_swiss_ak = require("swiss-ak");
 var configCache = /* @__PURE__ */ new Map();
 var addToCache = (info) => {
   configCache.set(info.key, info);
@@ -154,7 +107,7 @@ var getFromCache = (key) => {
   return configCache.get(key);
 };
 var getMultipleFromCache = (keys) => {
-  return import_swiss_ak2.ObjectUtils.clean(Object.fromEntries((0, import_swiss_ak2.zip)(keys, keys.map(getFromCache))));
+  return import_swiss_ak.ObjectUtils.clean(Object.fromEntries((0, import_swiss_ak.zip)(keys, keys.map(getFromCache))));
 };
 
 // src/utils/configUtils.ts
@@ -296,6 +249,81 @@ var setSingle = async (key, value, identifier) => {
   await set({ [key]: value }, identifier);
 };
 
+// src/commands/abilities.ts
+var import_swiss_ak2 = require("swiss-ak");
+var toCamelCase = (input) => input.toLowerCase().replace(/[^A-Za-z0-9 ]/g, "").split(/\s+/g).map((word, index) => index ? import_swiss_ak2.fn.capitalise(word) : word).join("");
+var keyDictionary = {
+  abilitiesForCamera: "model"
+};
+var parseKey = (key) => {
+  if (!key)
+    return key;
+  if (keyDictionary[key])
+    return keyDictionary[key];
+  const camel = toCamelCase(key);
+  if (keyDictionary[camel])
+    return keyDictionary[camel];
+  return camel;
+};
+var parseValue = (value) => {
+  if (value === "")
+    return void 0;
+  if (value === "yes")
+    return true;
+  if (value === "no")
+    return false;
+  if (!Number.isNaN(Number(value)))
+    return Number(value);
+  return value;
+};
+var parseAbilitiesTable = (out) => {
+  const pairs = out.split("\n").filter((line) => line.trim().length).map((line) => line.split(":").map((item) => item.trim())).filter((pair) => pair.length === 2);
+  let lastKey = "";
+  const result = {};
+  for (let [rawKey, rawValue] of pairs) {
+    const key = parseKey(rawKey);
+    const value = parseValue(rawValue);
+    if (key)
+      lastKey = key;
+    if (key !== lastKey) {
+      if (!(result[lastKey] instanceof Array)) {
+        result[lastKey] = [result[lastKey]];
+      }
+      result[lastKey] = [...result[lastKey], value].filter((v) => v);
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+};
+var abilities = async (identifier) => {
+  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --abilities `);
+  return parseAbilitiesTable(out);
+};
+
+// src/utils/readTable.ts
+var import_swiss_ak3 = require("swiss-ak");
+var readTable = (out, propertyNames) => {
+  const lines = out.split("\n");
+  const sepIndex = lines.findIndex((line) => line.trim().startsWith("-----"));
+  const head = lines[sepIndex - 1];
+  const rows = lines.slice(sepIndex + 1);
+  const readLine = (line) => line.trim().split(/\s{3,}/);
+  const properties = propertyNames || readLine(head).map((name) => name.toLowerCase().replace(/[^A-Za-z0-9]/g, "-"));
+  const objs = rows.filter((line) => line.trim().length).map((line) => {
+    const values = readLine(line);
+    return Object.fromEntries((0, import_swiss_ak3.zip)(properties, values));
+  });
+  return objs;
+};
+
+// src/commands/autoDetect.ts
+var autoDetect = async () => {
+  const out = await runCmd("gphoto2 --auto-detect");
+  const cameras = readTable(out, ["model", "port"]);
+  return cameras;
+};
+
 // src/commands/listCameras.ts
 var listCameras = async () => {
   const out = await runCmd("gphoto2 --list-cameras");
@@ -319,11 +347,14 @@ var listPorts = async () => {
 };
 
 // src/commands/reset.ts
-var import_swiss_ak3 = require("swiss-ak");
+var import_swiss_ak4 = require("swiss-ak");
 var reset = async (identifier) => {
   await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --reset`);
-  await (0, import_swiss_ak3.wait)(0);
+  await (0, import_swiss_ak4.wait)(0);
 };
+
+// src/index.ts
+var src_default = gPhoto_exports;
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   abilities,

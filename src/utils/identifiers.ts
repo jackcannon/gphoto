@@ -1,15 +1,20 @@
 import { wrapQuotes } from './wrapQuotes';
 
 /**
- * Used to specify a camera to use.
+ * Used to identify/specify a camera. Useful if there are multiple cameras connected.
  *
- * Note that if you specify ```model```, you must also specify ```port```. Otherwise the ```model``` option will be silently ignored.
+ * From the gphoto2 docs:
+ * > if you specify ```model```, you must also specify ```port```. Otherwise the ```model``` option will be silently ignored.
  */
 export interface GPhotoIdentifier {
+  /**
+   * The ```port``` value of the camera.
+   */
   port?: string;
 
   /**
-   * Note that if you specify ```model```, you must also specify ```port```. Otherwise the ```model``` option will be silently ignored.
+   * From the gphoto2 docs:
+   * > if you specify ```model```, you must also specify ```port```. Otherwise the ```model``` option will be silently ignored.
    */
   model?: string;
 }

@@ -1,0 +1,28 @@
+{
+  "kindSortOrder": [
+    "Reference",
+    "Project",
+    "Module",
+    "Namespace",
+    "Enum",
+    "EnumMember",
+    "Class",
+    "Constructor",
+    "Method",
+    "Function",
+    "Property",
+    "Variable",
+    "Accessor",
+    "ObjectLiteral",
+    "Parameter",
+    "CallSignature",
+    "ConstructorSignature",
+    "IndexSignature",
+    "GetSignature",
+    "SetSignature",
+    "Interface",
+    "TypeAlias",
+    "TypeParameter",
+    "TypeLiteral"
+  ]
+}

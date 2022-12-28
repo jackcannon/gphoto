@@ -3,8 +3,13 @@ import { GPhotoIdentifier, getIdentifierFlags } from './identifiers';
 import { runCmd } from './runCmd';
 import { wrapQuotes } from './wrapQuotes';
 
+// TODO docs
 export type GPhotoConfigDataType = string | number | boolean | Date;
+
+// TODO docs
 export type GPhotoConfigType = 'DATE' | 'MENU' | 'RADIO' | 'RANGE' | 'TEXT' | 'TOGGLE';
+
+// TODO docs
 export interface GPhotoConfigInfo {
   key: string;
   label: string;
@@ -31,9 +36,12 @@ export interface GPhotoConfigInfo {
   help?: string;
 }
 
+// TODO docs
 export interface GPhotoConfigInfoObj {
   [key: string]: GPhotoConfigInfo;
 }
+
+// TODO docs
 export interface GPhotoConfigValueObj {
   [key: string]: GPhotoConfigDataType;
 }
@@ -109,13 +117,14 @@ export const parseSingleConfigInfo = (configInfo: string, knownKey?: string): [G
   return [current, config];
 };
 
-// no public API
+// not public API
 export const getAllConfigInfoAndValues = async (identifier?: GPhotoIdentifier): Promise<[GPhotoConfigDataType, GPhotoConfigInfo][]> => {
   const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --list-all-config`);
 
   return parseConfigInfo(out);
 };
 
+// not public API
 export const getMultipleConfigInfoAndValues = async (
   keys: string[],
   identifier?: GPhotoIdentifier

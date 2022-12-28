@@ -4,6 +4,8 @@
 
 The abilities of a camera. Returned by gPhoto.abilities()
 
+Actual properties may not exactly match this interface, it's just a guide.
+
 ## Indexable
 
 ▪ [key: `string`]: `string` \| `number` \| `boolean` \| `string`[] \| `number`[] \| `boolean`[]
@@ -12,66 +14,66 @@ The abilities of a camera. Returned by gPhoto.abilities()
 
 ### Properties
 
-- [Abilities for camera](GPhotoAbilities.md#abilities for camera)
-- [Capture choices](GPhotoAbilities.md#capture choices)
-- [Configuration support](GPhotoAbilities.md#configuration support)
-- [Delete all files on camera](GPhotoAbilities.md#delete all files on camera)
-- [Delete selected files on camera](GPhotoAbilities.md#delete selected files on camera)
-- [File preview (thumbnail) support](GPhotoAbilities.md#file preview (thumbnail) support)
-- [File upload support](GPhotoAbilities.md#file upload support)
-- [Serial port support](GPhotoAbilities.md#serial port support)
-- [USB support](GPhotoAbilities.md#usb support)
+- [captureChoices](GPhotoAbilities.md#capturechoices)
+- [configurationSupport](GPhotoAbilities.md#configurationsupport)
+- [deleteAllFilesOnCamera](GPhotoAbilities.md#deleteallfilesoncamera)
+- [deleteSelectedFilesOnCamera](GPhotoAbilities.md#deleteselectedfilesoncamera)
+- [filePreviewThumbnailSupport](GPhotoAbilities.md#filepreviewthumbnailsupport)
+- [fileUploadSupport](GPhotoAbilities.md#fileuploadsupport)
+- [model](GPhotoAbilities.md#model)
+- [serialPortSupport](GPhotoAbilities.md#serialportsupport)
+- [usbSupport](GPhotoAbilities.md#usbsupport)
 
 ## Properties
 
-### Abilities for camera
+### captureChoices
 
- **Abilities for camera**: `string`
-
-___
-
-### Capture choices
-
- **Capture choices**: `string`[]
+ **captureChoices**: `string`[]
 
 ___
 
-### Configuration support
+### configurationSupport
 
- **Configuration support**: `boolean`
-
-___
-
-### Delete all files on camera
-
- **Delete all files on camera**: `boolean`
+ **configurationSupport**: `boolean`
 
 ___
 
-### Delete selected files on camera
+### deleteAllFilesOnCamera
 
- **Delete selected files on camera**: `boolean`
-
-___
-
-### File preview (thumbnail) support
-
- **File preview (thumbnail) support**: `boolean`
+ **deleteAllFilesOnCamera**: `boolean`
 
 ___
 
-### File upload support
+### deleteSelectedFilesOnCamera
 
- **File upload support**: `boolean`
-
-___
-
-### Serial port support
-
- **Serial port support**: `boolean`
+ **deleteSelectedFilesOnCamera**: `boolean`
 
 ___
 
-### USB support
+### filePreviewThumbnailSupport
 
- **USB support**: `boolean`
+ **filePreviewThumbnailSupport**: `boolean`
+
+___
+
+### fileUploadSupport
+
+ **fileUploadSupport**: `boolean`
+
+___
+
+### model
+
+ **model**: `string`
+
+___
+
+### serialPortSupport
+
+ **serialPortSupport**: `boolean`
+
+___
+
+### usbSupport
+
+ **usbSupport**: `boolean`

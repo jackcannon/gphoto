@@ -1,62 +1,20 @@
 /**
- * Used to specify a camera to use.
+ * Used to identify/specify a camera. Useful if there are multiple cameras connected.
  *
- * Note that if you specify ```model```, you must also specify ```port```. Otherwise the ```model``` option will be silently ignored.
+ * From the gphoto2 docs:
+ * > if you specify ```model```, you must also specify ```port```. Otherwise the ```model``` option will be silently ignored.
  */
 interface GPhotoIdentifier {
+    /**
+     * The ```port``` value of the camera.
+     */
     port?: string;
     /**
-     * Note that if you specify ```model```, you must also specify ```port```. Otherwise the ```model``` option will be silently ignored.
+     * From the gphoto2 docs:
+     * > if you specify ```model```, you must also specify ```port```. Otherwise the ```model``` option will be silently ignored.
      */
     model?: string;
 }
-
-/**
- * The abilities of a camera. Returned by gPhoto.abilities()
- */
-interface GPhotoAbilities {
-    'Abilities for camera': string;
-    'Serial port support': boolean;
-    'USB support': boolean;
-    'Capture choices': string[];
-    'Configuration support': boolean;
-    'Delete selected files on camera': boolean;
-    'Delete all files on camera': boolean;
-    'File preview (thumbnail) support': boolean;
-    'File upload support': boolean;
-    [key: string]: string | number | boolean | string[] | number[] | boolean[];
-}
-/**
- * Display the camera and driver abilities specified in the libgphoto2 driver.
- * This all does not query the camera, it uses data provided by the libgphoto2 library.
- *
- * @example
- * ```typescript
- * import gPhoto from 'gphoto';
- * const abilities = await gPhoto.abilities();
- * console.log(abilities);
- *
- * // {
- * //   'Abilities for camera': 'Nikon DSC D5200',
- * //   'Serial port support': false,
- * //   'USB support': true,
- * //   'Capture choices': [ 'Image', 'Preview', 'Trigger Capture' ],
- * //   'Configuration support': true,
- * //   'Delete selected files on camera': true,
- * //   'Delete all files on camera': false,
- * //   'File preview (thumbnail) support': true,
- * //   'File upload support': false
- * // }
- *
- * ```
- */
-declare const abilities: (identifier?: GPhotoIdentifier) => Promise<GPhotoAbilities>;
-
-interface GPhotoAutoDetectCamera {
-    model: string;
-    port: string;
-}
-declare const autoDetect: () => Promise<GPhotoAutoDetectCamera[]>;
 
 declare type GPhotoConfigDataType = string | number | boolean | Date;
 declare type GPhotoConfigType = 'DATE' | 'MENU' | 'RADIO' | 'RANGE' | 'TEXT' | 'TOGGLE';
@@ -131,6 +89,49 @@ declare namespace config {
   };
 }
 
+/**
+ * The abilities of a camera. Returned by gPhoto.abilities()
+ *
+ * Actual properties may not exactly match this interface, it's just a guide.
+ */
+interface GPhotoAbilities {
+    model: string;
+    serialPortSupport: boolean;
+    usbSupport: boolean;
+    captureChoices: string[];
+    configurationSupport: boolean;
+    deleteSelectedFilesOnCamera: boolean;
+    deleteAllFilesOnCamera: boolean;
+    filePreviewThumbnailSupport: boolean;
+    fileUploadSupport: boolean;
+    [key: string]: string | number | boolean | string[] | number[] | boolean[];
+}
+/**
+ * Display the camera and driver abilities specified in the libgphoto2 driver.
+ * This all does not query the camera, it uses data provided by the libgphoto2 library.
+ *
+ * ```ts
+ * import * as gPhoto from 'gphoto';
+ * const abilities = await gPhoto.abilities();
+ *
+ * console.log(abilities.captureChoices.includes('Image')); // true
+ * console.log(abilties.captureChoices.includes('Video')); // false
+ * console.log(abilties.deleteSelectedFilesOnCamera); // true
+ * ```
+ */
+declare const abilities: (identifier?: GPhotoIdentifier) => Promise<GPhotoAbilities>;
+
+/**
+ * Returns a list of connected cameras
+ *
+ * ```ts
+ * import {autoDetect} from 'gphoto';
+ *
+ * const cameras = await autoDetect();
+ * ```
+ */
+declare const autoDetect: () => Promise<GPhotoIdentifier[]>;
+
 interface GPhotoSupportedCamera {
     model: string;
     flag?: string;
@@ -145,4 +146,43 @@ declare const listPorts: () => Promise<GPhotoListedPort[]>;
 
 declare const reset: (identifier?: GPhotoIdentifier) => Promise<void>;
 
-export { GPhotoAbilities, abilities, autoDetect, config, listCameras, listPorts, reset };
+/**
+ * A collection of functions for managing the configuration of a camera.
+ */
+
+declare const gPhoto_config: typeof config;
+type gPhoto_GPhotoIdentifier = GPhotoIdentifier;
+type gPhoto_GPhotoConfigValueObj = GPhotoConfigValueObj;
+type gPhoto_GPhotoConfigInfoObj = GPhotoConfigInfoObj;
+type gPhoto_GPhotoConfigInfo = GPhotoConfigInfo;
+type gPhoto_GPhotoConfigDataType = GPhotoConfigDataType;
+type gPhoto_GPhotoConfigType = GPhotoConfigType;
+type gPhoto_GPhotoAbilities = GPhotoAbilities;
+declare const gPhoto_abilities: typeof abilities;
+declare const gPhoto_autoDetect: typeof autoDetect;
+type gPhoto_GPhotoSupportedCamera = GPhotoSupportedCamera;
+declare const gPhoto_listCameras: typeof listCameras;
+type gPhoto_GPhotoListedPort = GPhotoListedPort;
+declare const gPhoto_listPorts: typeof listPorts;
+declare const gPhoto_reset: typeof reset;
+declare namespace gPhoto {
+  export {
+    gPhoto_config as config,
+    gPhoto_GPhotoIdentifier as GPhotoIdentifier,
+    gPhoto_GPhotoConfigValueObj as GPhotoConfigValueObj,
+    gPhoto_GPhotoConfigInfoObj as GPhotoConfigInfoObj,
+    gPhoto_GPhotoConfigInfo as GPhotoConfigInfo,
+    gPhoto_GPhotoConfigDataType as GPhotoConfigDataType,
+    gPhoto_GPhotoConfigType as GPhotoConfigType,
+    gPhoto_GPhotoAbilities as GPhotoAbilities,
+    gPhoto_abilities as abilities,
+    gPhoto_autoDetect as autoDetect,
+    gPhoto_GPhotoSupportedCamera as GPhotoSupportedCamera,
+    gPhoto_listCameras as listCameras,
+    gPhoto_GPhotoListedPort as GPhotoListedPort,
+    gPhoto_listPorts as listPorts,
+    gPhoto_reset as reset,
+  };
+}
+
+export { GPhotoAbilities, GPhotoConfigDataType, GPhotoConfigInfo, GPhotoConfigInfoObj, GPhotoConfigType, GPhotoConfigValueObj, GPhotoIdentifier, GPhotoListedPort, GPhotoSupportedCamera, abilities, autoDetect, config, gPhoto as default, listCameras, listPorts, reset };

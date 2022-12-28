@@ -1,5 +1,6 @@
 import { runCmd } from '../utils/runCmd';
 
+// TODO docs
 export interface GPhotoSupportedCamera {
   model: string;
   flag?: string;
