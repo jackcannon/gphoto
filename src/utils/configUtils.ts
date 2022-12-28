@@ -3,13 +3,29 @@ import { GPhotoIdentifier, getIdentifierFlags } from './identifiers';
 import { runCmd } from './runCmd';
 import { wrapQuotes } from './wrapQuotes';
 
-// TODO docs
+/**
+ * Possible data types for a config value.
+ */
 export type GPhotoConfigDataType = string | number | boolean | Date;
 
-// TODO docs
+/**
+ * Possible types of a config.
+ *
+ * | Value    | Date Type         | Description                   |
+ * | -------- | ----------------- | ----------------------------- |
+ * | 'DATE'   | `Date` or `'now'` | A date value                  |
+ * | 'MENU'   | `string`          | Has a list of choices         |
+ * | 'RADIO'  | `string`          | Has a list of choices         |
+ * | 'RANGE'  | `number`          | A number value within a range |
+ * | 'TEXT'   | `string`          | A text value                  |
+ * | 'TOGGLE' | `boolean`         | An on/off value               |
+ */
 export type GPhotoConfigType = 'DATE' | 'MENU' | 'RADIO' | 'RANGE' | 'TEXT' | 'TOGGLE';
 
-// TODO docs
+/**
+ * The information about a configuration option.
+ * Contains details on how to display and edit the value.
+ */
 export interface GPhotoConfigInfo {
   key: string;
   label: string;
@@ -36,12 +52,16 @@ export interface GPhotoConfigInfo {
   help?: string;
 }
 
-// TODO docs
+/**
+ * A map of config keys to their configuration option info.
+ */
 export interface GPhotoConfigInfoObj {
   [key: string]: GPhotoConfigInfo;
 }
 
-// TODO docs
+/**
+ * A map of config keys to their current value.
+ */
 export interface GPhotoConfigValueObj {
   [key: string]: GPhotoConfigDataType;
 }

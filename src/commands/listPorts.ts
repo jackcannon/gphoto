@@ -1,13 +1,24 @@
 import { runCmd } from '../utils/runCmd';
 import { readTable } from '../utils/readTable';
 
-// TODO docs
+/**
+ * Information about a port listed by `gphoto2 --list-ports`.
+ */
 export interface GPhotoListedPort {
   path: string;
   description: string;
 }
 
-// TODO docs
+/**
+ * List supported port devices.
+ *
+ * ```ts
+ * import gPhoto from 'gphoto';
+ *
+ * const ports = await gPhoto.listPorts();
+ * ports; // [{ path: 'usb:001,003', description: 'USB PTP Class Camera' }, ...]
+ * ```
+ */
 export const listPorts = async (): Promise<GPhotoListedPort[]> => {
   const out = await runCmd('gphoto2 --list-ports');
 

@@ -2,6 +2,8 @@
 
 # Interface: GPhotoSupportedCamera
 
+Information about a supported camera model.
+
 ## Table of contents
 
 ### Properties

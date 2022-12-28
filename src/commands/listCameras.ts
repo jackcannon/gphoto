@@ -1,12 +1,23 @@
 import { runCmd } from '../utils/runCmd';
 
-// TODO docs
+/**
+ * Information about a supported camera model.
+ */
 export interface GPhotoSupportedCamera {
   model: string;
   flag?: string;
 }
 
-// TODO docs
+/**
+ * List supported camera models.
+ *
+ * ```ts
+ * import gPhoto from 'gphoto';
+ *
+ * const cameras = await gPhoto.listCameras();
+ * cameras; // [{ model: 'Canon EOS 5D Mark IV' }, ...]
+ * ```
+ */
 export const listCameras = async (): Promise<GPhotoSupportedCamera[]> => {
   const out = await runCmd('gphoto2 --list-cameras');
 

@@ -45,7 +45,7 @@ var config_exports = {};
 __export(config_exports, {
   get: () => get,
   getAll: () => getAll,
-  getAllInfos: () => getAllInfos,
+  getAllInfo: () => getAllInfo,
   getAllValues: () => getAllValues,
   getInfos: () => getInfos,
   getSingle: () => getSingle,
@@ -189,6 +189,11 @@ var getMultipleConfigInfoAndValues = async (keys, identifier) => {
 };
 
 // src/commands/config.ts
+var list = async (identifier) => {
+  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --list-config`);
+  const lines = out.split("\n").map((s) => s.trim()).filter((s) => s.length);
+  return lines;
+};
 var getAll = async (identifier) => {
   const pairs = await getAllConfigInfoAndValues(identifier);
   const valuesEntries = pairs.map(([value, info]) => [info.key, value]);
@@ -198,15 +203,10 @@ var getAll = async (identifier) => {
     values: Object.fromEntries(valuesEntries)
   };
 };
-var getAllInfos = async (identifier) => {
+var getAllInfo = async (identifier) => {
   const pairs = await getAllConfigInfoAndValues(identifier);
   const infoEntries = pairs.map(([value, info]) => [info.key, info]);
   return Object.fromEntries(infoEntries);
-};
-var getAllValues = async (identifier) => {
-  const pairs = await getAllConfigInfoAndValues(identifier);
-  const valuesEntries = pairs.map(([value, info]) => [info.key, value]);
-  return Object.fromEntries(valuesEntries);
 };
 var getInfos = async (keys, identifier) => {
   const pairs = await getMultipleConfigInfoAndValues(keys, identifier);
@@ -216,6 +216,11 @@ var getSingleInfo = async (key, identifier) => {
   const list2 = await getInfos([key], identifier);
   return list2[key];
 };
+var getAllValues = async (identifier) => {
+  const pairs = await getAllConfigInfoAndValues(identifier);
+  const valuesEntries = pairs.map(([value, info]) => [info.key, value]);
+  return Object.fromEntries(valuesEntries);
+};
 var get = async (keys, identifier) => {
   const pairs = await getMultipleConfigInfoAndValues(keys, identifier);
   return Object.fromEntries(pairs.map(([value, info]) => [info.key, value]));
@@ -223,11 +228,6 @@ var get = async (keys, identifier) => {
 var getSingle = async (key, identifier) => {
   const list2 = await get([key], identifier);
   return list2[key];
-};
-var list = async (identifier) => {
-  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --list-config`);
-  const lines = out.split("\n").map((s) => s.trim()).filter((s) => s.length);
-  return lines;
 };
 var set = async (values, identifier) => {
   const keys = Object.keys(values);

@@ -42,7 +42,7 @@ Display the camera and driver abilities specified in the libgphoto2 driver.
 This all does not query the camera, it uses data provided by the libgphoto2 library.
 
 ```ts
-import * as gPhoto from 'gphoto';
+import gPhoto from 'gphoto';
 const abilities = await gPhoto.abilities();
 
 console.log(abilities.captureChoices.includes('Image')); // true
@@ -69,9 +69,12 @@ ___
 Returns a list of connected cameras
 
 ```ts
-import {autoDetect} from 'gphoto';
+import gPhoto from 'gphoto';
 
-const cameras = await autoDetect();
+const cameras = await gPhoto.autoDetect();
+
+await gPhoto.config.set({ '/main/imgsettings/iso': '2000' }, cameras[0]);
+await gPhoto.config.set({ '/main/imgsettings/iso': '2500' }, cameras[1]);
 ```
 
 #### Returns
@@ -84,6 +87,15 @@ ___
 
 **listCameras**(): `Promise`<[`GPhotoSupportedCamera`](interfaces/GPhotoSupportedCamera.md)[]\>
 
+List supported camera models.
+
+```ts
+import gPhoto from 'gphoto';
+
+const cameras = await gPhoto.listCameras();
+cameras; // [{ model: 'Canon EOS 5D Mark IV' }, ...]
+```
+
 #### Returns
 
 `Promise`<[`GPhotoSupportedCamera`](interfaces/GPhotoSupportedCamera.md)[]\>
@@ -94,6 +106,15 @@ ___
 
 **listPorts**(): `Promise`<[`GPhotoListedPort`](interfaces/GPhotoListedPort.md)[]\>
 
+List supported port devices.
+
+```ts
+import gPhoto from 'gphoto';
+
+const ports = await gPhoto.listPorts();
+ports; // [{ path: 'usb:001,003', description: 'USB PTP Class Camera' }, ...]
+```
+
 #### Returns
 
 `Promise`<[`GPhotoListedPort`](interfaces/GPhotoListedPort.md)[]\>
@@ -103,6 +124,18 @@ ___
 ### reset
 
 **reset**(`identifier?`): `Promise`<`void`\>
+
+Resets the USB port of the camera.
+
+This command resets the USB port of the camera.
+This option is useful if somehow the protocol talking to the camera locked up
+and simulates plugging out and in the camera.
+
+```ts
+import gPhoto from 'gphoto';
+
+await gPhoto.reset(); // camera is disconnected and reconnected
+```
 
 #### Parameters
 
@@ -120,8 +153,21 @@ ___
 
  **GPhotoConfigDataType**: `string` \| `number` \| `boolean` \| `Date`
 
+Possible data types for a config value.
+
 ___
 
 ### GPhotoConfigType
 
  **GPhotoConfigType**: ``"DATE"`` \| ``"MENU"`` \| ``"RADIO"`` \| ``"RANGE"`` \| ``"TEXT"`` \| ``"TOGGLE"``
+
+Possible types of a config.
+
+| Value    | Date Type         | Description                   |
+| -------- | ----------------- | ----------------------------- |
+| 'DATE'   | `Date` or `'now'` | A date value                  |
+| 'MENU'   | `string`          | Has a list of choices         |
+| 'RADIO'  | `string`          | Has a list of choices         |
+| 'RANGE'  | `number`          | A number value within a range |
+| 'TEXT'   | `string`          | A text value                  |
+| 'TOGGLE' | `boolean`         | An on/off value               |

@@ -2,6 +2,9 @@
 
 # Interface: GPhotoConfigInfo
 
+The information about a configuration option.
+Contains details on how to display and edit the value.
+
 ## Table of contents
 
 ### Properties
