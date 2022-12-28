@@ -36,27 +36,19 @@ gphoto
 
 ### GPhotoConfigDataType
 
-Ƭ **GPhotoConfigDataType**: `string` \| `number` \| `boolean` \| `Date`
-
-#### Defined in
-
-[utils/configUtils.ts:6](https://github.com/jackcannon/gphoto/blob/737a9c8/src/utils/configUtils.ts#L6)
+ **GPhotoConfigDataType**: `string` \| `number` \| `boolean` \| `Date`
 
 ___
 
 ### GPhotoConfigType
 
-Ƭ **GPhotoConfigType**: ``"DATE"`` \| ``"MENU"`` \| ``"RADIO"`` \| ``"RANGE"`` \| ``"TEXT"`` \| ``"TOGGLE"``
-
-#### Defined in
-
-[utils/configUtils.ts:7](https://github.com/jackcannon/gphoto/blob/737a9c8/src/utils/configUtils.ts#L7)
+ **GPhotoConfigType**: ``"DATE"`` \| ``"MENU"`` \| ``"RADIO"`` \| ``"RANGE"`` \| ``"TEXT"`` \| ``"TOGGLE"``
 
 ## Functions
 
 ### abilities
 
-▸ **abilities**(`identifier?`): `Promise`<[`GPhotoAbilities`](interfaces/GPhotoAbilities.md)\>
+**abilities**(`identifier?`): `Promise`<[`GPhotoAbilities`](interfaces/GPhotoAbilities.md)\>
 
 Display the camera and driver abilities specified in the libgphoto2 driver.
 This all does not query the camera, it uses data provided by the libgphoto2 library.
@@ -92,57 +84,41 @@ console.log(abilities);
 
 `Promise`<[`GPhotoAbilities`](interfaces/GPhotoAbilities.md)\>
 
-#### Defined in
-
-[commands/abilities.ts:76](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L76)
-
 ___
 
 ### autoDetect
 
-▸ **autoDetect**(): `Promise`<[`GPhotoAutoDetectCamera`](interfaces/GPhotoAutoDetectCamera.md)[]\>
+**autoDetect**(): `Promise`<[`GPhotoAutoDetectCamera`](interfaces/GPhotoAutoDetectCamera.md)[]\>
 
 #### Returns
 
 `Promise`<[`GPhotoAutoDetectCamera`](interfaces/GPhotoAutoDetectCamera.md)[]\>
 
-#### Defined in
-
-[commands/autoDetect.ts:10](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/autoDetect.ts#L10)
-
 ___
 
 ### listCameras
 
-▸ **listCameras**(): `Promise`<[`GPhotoSupportedCamera`](interfaces/GPhotoSupportedCamera.md)[]\>
+**listCameras**(): `Promise`<[`GPhotoSupportedCamera`](interfaces/GPhotoSupportedCamera.md)[]\>
 
 #### Returns
 
 `Promise`<[`GPhotoSupportedCamera`](interfaces/GPhotoSupportedCamera.md)[]\>
 
-#### Defined in
-
-[commands/listCameras.ts:9](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/listCameras.ts#L9)
-
 ___
 
 ### listPorts
 
-▸ **listPorts**(): `Promise`<[`GPhotoListedPort`](interfaces/GPhotoListedPort.md)[]\>
+**listPorts**(): `Promise`<[`GPhotoListedPort`](interfaces/GPhotoListedPort.md)[]\>
 
 #### Returns
 
 `Promise`<[`GPhotoListedPort`](interfaces/GPhotoListedPort.md)[]\>
 
-#### Defined in
-
-[commands/listPorts.ts:10](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/listPorts.ts#L10)
-
 ___
 
 ### reset
 
-▸ **reset**(`identifier?`): `Promise`<`void`\>
+**reset**(`identifier?`): `Promise`<`void`\>
 
 #### Parameters
 
@@ -153,7 +129,3 @@ ___
 #### Returns
 
 `Promise`<`void`\>
-
-#### Defined in
-
-[commands/reset.ts:6](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/reset.ts#L6)

@@ -26,88 +26,52 @@ The abilities of a camera. Returned by gPhoto.abilities()
 
 ### Abilities for camera
 
-• **Abilities for camera**: `string`
-
-#### Defined in
-
-[commands/abilities.ts:8](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L8)
+ **Abilities for camera**: `string`
 
 ___
 
 ### Capture choices
 
-• **Capture choices**: `string`[]
-
-#### Defined in
-
-[commands/abilities.ts:11](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L11)
+ **Capture choices**: `string`[]
 
 ___
 
 ### Configuration support
 
-• **Configuration support**: `boolean`
-
-#### Defined in
-
-[commands/abilities.ts:12](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L12)
+ **Configuration support**: `boolean`
 
 ___
 
 ### Delete all files on camera
 
-• **Delete all files on camera**: `boolean`
-
-#### Defined in
-
-[commands/abilities.ts:14](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L14)
+ **Delete all files on camera**: `boolean`
 
 ___
 
 ### Delete selected files on camera
 
-• **Delete selected files on camera**: `boolean`
-
-#### Defined in
-
-[commands/abilities.ts:13](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L13)
+ **Delete selected files on camera**: `boolean`
 
 ___
 
 ### File preview (thumbnail) support
 
-• **File preview (thumbnail) support**: `boolean`
-
-#### Defined in
-
-[commands/abilities.ts:15](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L15)
+ **File preview (thumbnail) support**: `boolean`
 
 ___
 
 ### File upload support
 
-• **File upload support**: `boolean`
-
-#### Defined in
-
-[commands/abilities.ts:16](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L16)
+ **File upload support**: `boolean`
 
 ___
 
 ### Serial port support
 
-• **Serial port support**: `boolean`
-
-#### Defined in
-
-[commands/abilities.ts:9](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L9)
+ **Serial port support**: `boolean`
 
 ___
 
 ### USB support
 
-• **USB support**: `boolean`
-
-#### Defined in
-
-[commands/abilities.ts:10](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L10)
+ **USB support**: `boolean`

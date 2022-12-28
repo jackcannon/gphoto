@@ -17,20 +17,12 @@ Note that if you specify ```model```, you must also specify ```port```. Otherwis
 
 ### model
 
-• `Optional` **model**: `string`
+ `Optional` **model**: `string`
 
 Note that if you specify ```model```, you must also specify ```port```. Otherwise the ```model``` option will be silently ignored.
-
-#### Defined in
-
-[utils/identifiers.ts:14](https://github.com/jackcannon/gphoto/blob/737a9c8/src/utils/identifiers.ts#L14)
 
 ___
 
 ### port
 
-• `Optional` **port**: `string`
-
-#### Defined in
-
-[utils/identifiers.ts:9](https://github.com/jackcannon/gphoto/blob/737a9c8/src/utils/identifiers.ts#L9)
+ `Optional` **port**: `string`

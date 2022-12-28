@@ -27,7 +27,7 @@
   "scripts": {
     "build": "yarn build:dist && yarn build:docs",
     "build:dist": "tsup-node src/index.ts --format cjs,esm --dts --clean",
-    "build:docs": "typedoc --plugin typedoc-plugin-markdown --entryDocument 'API.md' --readme none --out docs src/index.ts",
+    "build:docs": "typedoc --plugin typedoc-plugin-markdown --entryDocument 'API.md' --readme none --disableSources --hideMembersSymbol --out docs src/index.ts",
     "watch": "yarn build:dist -- --watch src",
     "prepublishOnly": "yarn build"
   },

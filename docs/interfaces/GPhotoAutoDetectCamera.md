@@ -13,18 +13,10 @@
 
 ### model
 
-• **model**: `string`
-
-#### Defined in
-
-[commands/autoDetect.ts:5](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/autoDetect.ts#L5)
+ **model**: `string`
 
 ___
 
 ### port
 
-• **port**: `string`
-
-#### Defined in
-
-[commands/autoDetect.ts:6](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/autoDetect.ts#L6)
+ **port**: `string`

@@ -13,18 +13,10 @@
 
 ### description
 
-• **description**: `string`
-
-#### Defined in
-
-[commands/listPorts.ts:6](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/listPorts.ts#L6)
+ **description**: `string`
 
 ___
 
 ### path
 
-• **path**: `string`
-
-#### Defined in
-
-[commands/listPorts.ts:5](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/listPorts.ts#L5)
+ **path**: `string`

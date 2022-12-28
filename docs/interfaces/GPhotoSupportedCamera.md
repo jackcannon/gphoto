@@ -13,18 +13,10 @@
 
 ### flag
 
-• `Optional` **flag**: `string`
-
-#### Defined in
-
-[commands/listCameras.ts:5](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/listCameras.ts#L5)
+ `Optional` **flag**: `string`
 
 ___
 
 ### model
 
-• **model**: `string`
-
-#### Defined in
-
-[commands/listCameras.ts:4](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/listCameras.ts#L4)
+ **model**: `string`
