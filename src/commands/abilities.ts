@@ -46,7 +46,31 @@ const parseAbilitiesTable = (out: string): GPhotoAbilities => {
   return result as GPhotoAbilities;
 };
 
-// TODO docs
+/**
+ * gPhoto.abilities
+ *
+ * Display the camera and driver abilities specified in the libgphoto2 driver.
+ * This all does not query the camera, it uses data provided by the libgphoto2 library.
+ *
+ * ```typescript
+ * import gPhoto from 'gphoto';
+ * const abilities = await gPhoto.abilities();
+ * console.log(abilities);
+ *
+ * // {
+ * //   'Abilities for camera': 'Nikon DSC D5200',
+ * //   'Serial port support': false,
+ * //   'USB support': true,
+ * //   'Capture choices': [ 'Image', 'Preview', 'Trigger Capture' ],
+ * //   'Configuration support': true,
+ * //   'Delete selected files on camera': true,
+ * //   'Delete all files on camera': false,
+ * //   'File preview (thumbnail) support': true,
+ * //   'File upload support': false
+ * // }
+ *
+ * ```
+ */
 export const abilities = async (identifier?: GPhotoIdentifier): Promise<GPhotoAbilities> => {
   const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --abilities `);
   return parseAbilitiesTable(out);
