@@ -1,21 +1,3 @@
-interface GPhotoAutoDetectCamera {
-    model: string;
-    port: string;
-}
-declare const autoDetect: () => Promise<GPhotoAutoDetectCamera[]>;
-
-interface GPhotoListedPort {
-    path: string;
-    description: string;
-}
-declare const listPorts: () => Promise<GPhotoListedPort[]>;
-
-interface GPhotoSupportedCamera {
-    model: string;
-    flag?: string;
-}
-declare const listCameras: () => Promise<GPhotoSupportedCamera[]>;
-
 interface GPhotoIdentifier {
     port?: string;
     /**
@@ -23,6 +5,51 @@ interface GPhotoIdentifier {
      */
     model?: string;
 }
+
+interface GPhotoAbilities {
+    'Abilities for camera': string;
+    'Serial port support': boolean;
+    'USB support': boolean;
+    'Capture choices': string[];
+    'Configuration support': boolean;
+    'Delete selected files on camera': boolean;
+    'Delete all files on camera': boolean;
+    'File preview (thumbnail) support': boolean;
+    'File upload support': boolean;
+    [key: string]: string | number | boolean | string[] | number[] | boolean[];
+}
+/**
+ * gPhoto.abilities
+ *
+ * Display the camera and driver abilities specified in the libgphoto2 driver.
+ * This all does not query the camera, it uses data provided by the libgphoto2 library.
+ *
+ * ```typescript
+ * import gPhoto from 'gphoto';
+ * const abilities = await gPhoto.abilities();
+ * console.log(abilities);
+ *
+ * // {
+ * //   'Abilities for camera': 'Nikon DSC D5200',
+ * //   'Serial port support': false,
+ * //   'USB support': true,
+ * //   'Capture choices': [ 'Image', 'Preview', 'Trigger Capture' ],
+ * //   'Configuration support': true,
+ * //   'Delete selected files on camera': true,
+ * //   'Delete all files on camera': false,
+ * //   'File preview (thumbnail) support': true,
+ * //   'File upload support': false
+ * // }
+ *
+ * ```
+ */
+declare const abilities: (identifier?: GPhotoIdentifier) => Promise<GPhotoAbilities>;
+
+interface GPhotoAutoDetectCamera {
+    model: string;
+    port: string;
+}
+declare const autoDetect: () => Promise<GPhotoAutoDetectCamera[]>;
 
 declare type GPhotoConfigDataType = string | number | boolean | Date;
 declare type GPhotoConfigType = 'DATE' | 'MENU' | 'RADIO' | 'RANGE' | 'TEXT' | 'TOGGLE';
@@ -97,4 +124,18 @@ declare namespace config {
   };
 }
 
-export { autoDetect, config, listCameras, listPorts };
+interface GPhotoSupportedCamera {
+    model: string;
+    flag?: string;
+}
+declare const listCameras: () => Promise<GPhotoSupportedCamera[]>;
+
+interface GPhotoListedPort {
+    path: string;
+    description: string;
+}
+declare const listPorts: () => Promise<GPhotoListedPort[]>;
+
+declare const reset: (identifier?: GPhotoIdentifier) => Promise<void>;
+
+export { GPhotoAbilities, abilities, autoDetect, config, listCameras, listPorts, reset };

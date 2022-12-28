@@ -4,6 +4,26 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
+// src/utils/wrapQuotes.ts
+var wrapQuotes = (pathStr) => {
+  const escaped = pathStr.replace(/'/g, "\\'").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t").replace(/\f/g, "\\f").replace(/\\/g, "\\\\").replace(/\v/g, "\\v").replace(/\0/g, "\\0");
+  return `"${escaped}"`;
+};
+
+// src/utils/identifiers.ts
+var getIdentifierFlags = (identifier) => {
+  if (!identifier)
+    return "";
+  let result = "";
+  if (identifier.port) {
+    result += ` --port ${wrapQuotes(identifier.port)}`;
+  }
+  if (identifier.model) {
+    result += ` --camera ${wrapQuotes(identifier.model)}`;
+  }
+  return result.trim();
+};
+
 // src/utils/runCmd.ts
 import { exec } from "child_process";
 var ProcessPromise = class extends Promise {
@@ -25,6 +45,42 @@ var runCmd = (cmd) => new ProcessPromise(
     return resolve(stdout);
   })
 );
+
+// src/commands/abilities.ts
+var parseValue = (value) => {
+  if (value === "")
+    return void 0;
+  if (value === "yes")
+    return true;
+  if (value === "no")
+    return false;
+  if (!Number.isNaN(Number(value)))
+    return Number(value);
+  return value;
+};
+var parseAbilitiesTable = (out) => {
+  const pairs = out.split("\n").filter((line) => line.trim().length).map((line) => line.split(":").map((item) => item.trim())).filter((pair) => pair.length === 2);
+  let lastKey = "";
+  const result = {};
+  for (let [key, rawValue] of pairs) {
+    const value = parseValue(rawValue);
+    if (key)
+      lastKey = key;
+    if (key !== lastKey) {
+      if (!(result[lastKey] instanceof Array)) {
+        result[lastKey] = [result[lastKey]];
+      }
+      result[lastKey] = [...result[lastKey], value].filter((v) => v);
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+};
+var abilities = async (identifier) => {
+  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --abilities `);
+  return parseAbilitiesTable(out);
+};
 
 // src/utils/readTable.ts
 import { zip } from "swiss-ak";
@@ -49,28 +105,6 @@ var autoDetect = async () => {
   return cameras;
 };
 
-// src/commands/listPorts.ts
-var listPorts = async () => {
-  const out = await runCmd("gphoto2 --list-ports");
-  const cameras = readTable(out, ["path", "description"]);
-  return cameras;
-};
-
-// src/commands/listCameras.ts
-var listCameras = async () => {
-  const out = await runCmd("gphoto2 --list-cameras");
-  const lines = out.split("\n");
-  const startIndex = lines.findIndex((line) => line.trim().startsWith("Supported cameras:")) + 1;
-  const rows = lines.slice(startIndex).map((line) => line.trim().match(/"(.*)"(?: \((.*)\))?/)).filter((match) => match).map(([_match, model, flag]) => {
-    const result = { model };
-    if (flag) {
-      result.flag = flag;
-    }
-    return result;
-  });
-  return rows;
-};
-
 // src/commands/config.ts
 var config_exports = {};
 __export(config_exports, {
@@ -85,26 +119,6 @@ __export(config_exports, {
   set: () => set,
   setSingle: () => setSingle
 });
-
-// src/utils/wrapQuotes.ts
-var wrapQuotes = (pathStr) => {
-  const escaped = pathStr.replace(/'/g, "\\'").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t").replace(/\f/g, "\\f").replace(/\\/g, "\\\\").replace(/\v/g, "\\v").replace(/\0/g, "\\0");
-  return `"${escaped}"`;
-};
-
-// src/utils/identifiers.ts
-var getIdentifierFlags = (identifier) => {
-  if (!identifier)
-    return "";
-  let result = "";
-  if (identifier.port) {
-    result += ` --port ${wrapQuotes(identifier.port)}`;
-  }
-  if (identifier.model) {
-    result += ` --camera ${wrapQuotes(identifier.model)}`;
-  }
-  return result.trim();
-};
 
 // src/utils/configCache.ts
 import { ObjectUtils, zip as zip2 } from "swiss-ak";
@@ -257,9 +271,40 @@ var set = async (values, identifier) => {
 var setSingle = async (key, value, identifier) => {
   await set({ [key]: value }, identifier);
 };
+
+// src/commands/listCameras.ts
+var listCameras = async () => {
+  const out = await runCmd("gphoto2 --list-cameras");
+  const lines = out.split("\n");
+  const startIndex = lines.findIndex((line) => line.trim().startsWith("Supported cameras:")) + 1;
+  const rows = lines.slice(startIndex).map((line) => line.trim().match(/"(.*)"(?: \((.*)\))?/)).filter((match) => match).map(([_match, model, flag]) => {
+    const result = { model };
+    if (flag) {
+      result.flag = flag;
+    }
+    return result;
+  });
+  return rows;
+};
+
+// src/commands/listPorts.ts
+var listPorts = async () => {
+  const out = await runCmd("gphoto2 --list-ports");
+  const cameras = readTable(out, ["path", "description"]);
+  return cameras;
+};
+
+// src/commands/reset.ts
+import { wait } from "swiss-ak";
+var reset = async (identifier) => {
+  await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --reset`);
+  await wait(0);
+};
 export {
+  abilities,
   autoDetect,
   config_exports as config,
   listCameras,
-  listPorts
+  listPorts,
+  reset
 };
