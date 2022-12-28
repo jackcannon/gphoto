@@ -1,5 +1,10 @@
 import { wrapQuotes } from './wrapQuotes';
 
+/**
+ * Used to specify a camera to use.
+ *
+ * Note that if you specify ```model```, you must also specify ```port```. Otherwise the ```model``` option will be silently ignored.
+ */
 export interface GPhotoIdentifier {
   port?: string;
 

@@ -1,6 +1,6 @@
 import { runCmd } from '../utils/runCmd';
 
-interface GPhotoSupportedCamera {
+export interface GPhotoSupportedCamera {
   model: string;
   flag?: string;
 }

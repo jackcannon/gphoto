@@ -1,6 +1,9 @@
 import { GPhotoIdentifier, getIdentifierFlags } from '../utils/identifiers';
 import { runCmd } from '../utils/runCmd';
 
+/**
+ * The abilities of a camera. Returned by gPhoto.abilities()
+ */
 export interface GPhotoAbilities {
   'Abilities for camera': string;
   'Serial port support': boolean;
@@ -47,11 +50,10 @@ const parseAbilitiesTable = (out: string): GPhotoAbilities => {
 };
 
 /**
- * gPhoto.abilities
- *
  * Display the camera and driver abilities specified in the libgphoto2 driver.
  * This all does not query the camera, it uses data provided by the libgphoto2 library.
  *
+ * @example
  * ```typescript
  * import gPhoto from 'gphoto';
  * const abilities = await gPhoto.abilities();

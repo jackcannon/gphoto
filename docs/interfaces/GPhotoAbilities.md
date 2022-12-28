@@ -1,6 +1,8 @@
-[gphoto](../README.md) / [Exports](../modules.md) / GPhotoAbilities
+[gphoto](../API.md) / GPhotoAbilities
 
 # Interface: GPhotoAbilities
+
+The abilities of a camera. Returned by gPhoto.abilities()
 
 ## Indexable
 
@@ -28,7 +30,7 @@
 
 #### Defined in
 
-[commands/abilities.ts:5](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/abilities.ts#L5)
+[commands/abilities.ts:8](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L8)
 
 ___
 
@@ -38,7 +40,7 @@ ___
 
 #### Defined in
 
-[commands/abilities.ts:8](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/abilities.ts#L8)
+[commands/abilities.ts:11](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L11)
 
 ___
 
@@ -48,7 +50,7 @@ ___
 
 #### Defined in
 
-[commands/abilities.ts:9](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/abilities.ts#L9)
+[commands/abilities.ts:12](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L12)
 
 ___
 
@@ -58,7 +60,7 @@ ___
 
 #### Defined in
 
-[commands/abilities.ts:11](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/abilities.ts#L11)
+[commands/abilities.ts:14](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L14)
 
 ___
 
@@ -68,7 +70,7 @@ ___
 
 #### Defined in
 
-[commands/abilities.ts:10](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/abilities.ts#L10)
+[commands/abilities.ts:13](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L13)
 
 ___
 
@@ -78,7 +80,7 @@ ___
 
 #### Defined in
 
-[commands/abilities.ts:12](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/abilities.ts#L12)
+[commands/abilities.ts:15](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L15)
 
 ___
 
@@ -88,7 +90,7 @@ ___
 
 #### Defined in
 
-[commands/abilities.ts:13](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/abilities.ts#L13)
+[commands/abilities.ts:16](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L16)
 
 ___
 
@@ -98,7 +100,7 @@ ___
 
 #### Defined in
 
-[commands/abilities.ts:6](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/abilities.ts#L6)
+[commands/abilities.ts:9](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L9)
 
 ___
 
@@ -108,4 +110,4 @@ ___
 
 #### Defined in
 
-[commands/abilities.ts:7](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/abilities.ts#L7)
+[commands/abilities.ts:10](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/abilities.ts#L10)

@@ -1,7 +1,7 @@
 import { runCmd } from '../utils/runCmd';
 import { readTable } from '../utils/readTable';
 
-interface GPhotoAutoDetectCamera {
+export interface GPhotoAutoDetectCamera {
   model: string;
   port: string;
 }

@@ -1,4 +1,4 @@
-[gphoto](../README.md) / [Exports](../modules.md) / config
+[gphoto](../API.md) / config
 
 # Namespace: config
 
@@ -21,145 +21,145 @@
 
 ### get
 
-▸ **get**(`keys`, `identifier?`): `Promise`<`GPhotoConfigValueObj`\>
+▸ **get**(`keys`, `identifier?`): `Promise`<[`GPhotoConfigValueObj`](../interfaces/GPhotoConfigValueObj.md)\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `keys` | `string`[] |
-| `identifier?` | `GPhotoIdentifier` |
+| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) |
 
 #### Returns
 
-`Promise`<`GPhotoConfigValueObj`\>
+`Promise`<[`GPhotoConfigValueObj`](../interfaces/GPhotoConfigValueObj.md)\>
 
 #### Defined in
 
-[commands/config.ts:56](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/config.ts#L56)
+[commands/config.ts:56](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/config.ts#L56)
 
 ___
 
 ### getAll
 
-▸ **getAll**(`identifier?`): `Promise`<{ `info`: `GPhotoConfigInfoObj` ; `values`: `GPhotoConfigValueObj`  }\>
+▸ **getAll**(`identifier?`): `Promise`<{ `info`: [`GPhotoConfigInfoObj`](../interfaces/GPhotoConfigInfoObj.md) ; `values`: [`GPhotoConfigValueObj`](../interfaces/GPhotoConfigValueObj.md)  }\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `identifier?` | `GPhotoIdentifier` |
+| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) |
 
 #### Returns
 
-`Promise`<{ `info`: `GPhotoConfigInfoObj` ; `values`: `GPhotoConfigValueObj`  }\>
+`Promise`<{ `info`: [`GPhotoConfigInfoObj`](../interfaces/GPhotoConfigInfoObj.md) ; `values`: [`GPhotoConfigValueObj`](../interfaces/GPhotoConfigValueObj.md)  }\>
 
 #### Defined in
 
-[commands/config.ts:16](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/config.ts#L16)
+[commands/config.ts:16](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/config.ts#L16)
 
 ___
 
 ### getAllInfos
 
-▸ **getAllInfos**(`identifier?`): `Promise`<`GPhotoConfigInfoObj`\>
+▸ **getAllInfos**(`identifier?`): `Promise`<[`GPhotoConfigInfoObj`](../interfaces/GPhotoConfigInfoObj.md)\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `identifier?` | `GPhotoIdentifier` |
+| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) |
 
 #### Returns
 
-`Promise`<`GPhotoConfigInfoObj`\>
+`Promise`<[`GPhotoConfigInfoObj`](../interfaces/GPhotoConfigInfoObj.md)\>
 
 #### Defined in
 
-[commands/config.ts:29](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/config.ts#L29)
+[commands/config.ts:29](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/config.ts#L29)
 
 ___
 
 ### getAllValues
 
-▸ **getAllValues**(`identifier?`): `Promise`<`GPhotoConfigValueObj`\>
+▸ **getAllValues**(`identifier?`): `Promise`<[`GPhotoConfigValueObj`](../interfaces/GPhotoConfigValueObj.md)\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `identifier?` | `GPhotoIdentifier` |
+| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) |
 
 #### Returns
 
-`Promise`<`GPhotoConfigValueObj`\>
+`Promise`<[`GPhotoConfigValueObj`](../interfaces/GPhotoConfigValueObj.md)\>
 
 #### Defined in
 
-[commands/config.ts:36](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/config.ts#L36)
+[commands/config.ts:36](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/config.ts#L36)
 
 ___
 
 ### getInfos
 
-▸ **getInfos**(`keys`, `identifier?`): `Promise`<`GPhotoConfigInfoObj`\>
+▸ **getInfos**(`keys`, `identifier?`): `Promise`<[`GPhotoConfigInfoObj`](../interfaces/GPhotoConfigInfoObj.md)\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `keys` | `string`[] |
-| `identifier?` | `GPhotoIdentifier` |
+| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) |
 
 #### Returns
 
-`Promise`<`GPhotoConfigInfoObj`\>
+`Promise`<[`GPhotoConfigInfoObj`](../interfaces/GPhotoConfigInfoObj.md)\>
 
 #### Defined in
 
-[commands/config.ts:43](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/config.ts#L43)
+[commands/config.ts:43](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/config.ts#L43)
 
 ___
 
 ### getSingle
 
-▸ **getSingle**(`key`, `identifier?`): `Promise`<`GPhotoConfigDataType`\>
+▸ **getSingle**(`key`, `identifier?`): `Promise`<[`GPhotoConfigDataType`](../API.md#gphotoconfigdatatype)\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `key` | `string` |
-| `identifier?` | `GPhotoIdentifier` |
+| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) |
 
 #### Returns
 
-`Promise`<`GPhotoConfigDataType`\>
+`Promise`<[`GPhotoConfigDataType`](../API.md#gphotoconfigdatatype)\>
 
 #### Defined in
 
-[commands/config.ts:63](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/config.ts#L63)
+[commands/config.ts:63](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/config.ts#L63)
 
 ___
 
 ### getSingleInfo
 
-▸ **getSingleInfo**(`key`, `identifier?`): `Promise`<`GPhotoConfigInfo`\>
+▸ **getSingleInfo**(`key`, `identifier?`): `Promise`<[`GPhotoConfigInfo`](../interfaces/GPhotoConfigInfo.md)\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `key` | `string` |
-| `identifier?` | `GPhotoIdentifier` |
+| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) |
 
 #### Returns
 
-`Promise`<`GPhotoConfigInfo`\>
+`Promise`<[`GPhotoConfigInfo`](../interfaces/GPhotoConfigInfo.md)\>
 
 #### Defined in
 
-[commands/config.ts:50](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/config.ts#L50)
+[commands/config.ts:50](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/config.ts#L50)
 
 ___
 
@@ -171,7 +171,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `identifier?` | `GPhotoIdentifier` |
+| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) |
 
 #### Returns
 
@@ -179,7 +179,7 @@ ___
 
 #### Defined in
 
-[commands/config.ts:69](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/config.ts#L69)
+[commands/config.ts:69](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/config.ts#L69)
 
 ___
 
@@ -192,7 +192,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `values` | `Object` |
-| `identifier?` | `GPhotoIdentifier` |
+| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) |
 
 #### Returns
 
@@ -200,7 +200,7 @@ ___
 
 #### Defined in
 
-[commands/config.ts:79](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/config.ts#L79)
+[commands/config.ts:79](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/config.ts#L79)
 
 ___
 
@@ -213,8 +213,8 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `key` | `string` |
-| `value` | `GPhotoConfigDataType` |
-| `identifier?` | `GPhotoIdentifier` |
+| `value` | [`GPhotoConfigDataType`](../API.md#gphotoconfigdatatype) |
+| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) |
 
 #### Returns
 
@@ -222,4 +222,4 @@ ___
 
 #### Defined in
 
-[commands/config.ts:100](https://github.com/jackcannon/gphoto/blob/ab4811e/src/commands/config.ts#L100)
+[commands/config.ts:100](https://github.com/jackcannon/gphoto/blob/737a9c8/src/commands/config.ts#L100)

@@ -1,9 +1,9 @@
-/**
- * Reads tables output by gphoto2
- */
-
 import { zip } from 'swiss-ak';
 
+/**
+ * @ignore
+ * Reads tables output by gphoto2
+ */
 export const readTable = <T extends unknown>(out: string, propertyNames?: string[]): T[] => {
   const lines = out.split('\n');
 

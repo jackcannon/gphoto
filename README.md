@@ -9,7 +9,6 @@ A simple node.js exec wrapper for [gphoto2](http://www.gphoto.org/)
       - [APT](#apt)
     - [Add gphoto to project](#add-gphoto-to-project)
   - [API](#api)
-    - [gphoto.autoDetect](#gphotoautodetect)
 
 ## Install
 
@@ -49,14 +48,4 @@ yarn add gphoto
 
 ## API
 
-A collection of user input functions that use the `prompts` library
-
-### gphoto.autoDetect
-
-TODO - write docs
-
-```typescript
-// example here
-```
-
-[↑ Back to top ↑](#gphoto)
+Full TypeDoc API documents can be [found here](docs/API.md)

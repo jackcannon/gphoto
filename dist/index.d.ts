@@ -1,3 +1,8 @@
+/**
+ * Used to specify a camera to use.
+ *
+ * Note that if you specify ```model```, you must also specify ```port```. Otherwise the ```model``` option will be silently ignored.
+ */
 interface GPhotoIdentifier {
     port?: string;
     /**
@@ -6,6 +11,9 @@ interface GPhotoIdentifier {
     model?: string;
 }
 
+/**
+ * The abilities of a camera. Returned by gPhoto.abilities()
+ */
 interface GPhotoAbilities {
     'Abilities for camera': string;
     'Serial port support': boolean;
@@ -19,11 +27,10 @@ interface GPhotoAbilities {
     [key: string]: string | number | boolean | string[] | number[] | boolean[];
 }
 /**
- * gPhoto.abilities
- *
  * Display the camera and driver abilities specified in the libgphoto2 driver.
  * This all does not query the camera, it uses data provided by the libgphoto2 library.
  *
+ * @example
  * ```typescript
  * import gPhoto from 'gphoto';
  * const abilities = await gPhoto.abilities();
