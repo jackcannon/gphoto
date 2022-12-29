@@ -7,6 +7,8 @@
 ### References
 
 - [GPhotoAbilities](default.md#gphotoabilities)
+- [GPhotoCaptureKeep](default.md#gphotocapturekeep)
+- [GPhotoCaptureOptions](default.md#gphotocaptureoptions)
 - [GPhotoConfigDataType](default.md#gphotoconfigdatatype)
 - [GPhotoConfigInfo](default.md#gphotoconfiginfo)
 - [GPhotoConfigInfoObj](default.md#gphotoconfiginfoobj)
@@ -14,7 +16,10 @@
 - [GPhotoConfigValueObj](default.md#gphotoconfigvalueobj)
 - [GPhotoIdentifier](default.md#gphotoidentifier)
 - [GPhotoListedPort](default.md#gphotolistedport)
+- [GPhotoLiveview](default.md#gphotoliveview)
 - [GPhotoSupportedCamera](default.md#gphotosupportedcamera)
+- [SaveLocation](default.md#savelocation)
+- [SaveLocationType](default.md#savelocationtype)
 - [abilities](default.md#abilities)
 - [autoDetect](default.md#autodetect)
 - [autofocus](default.md#autofocus)
@@ -29,6 +34,18 @@
 ### GPhotoAbilities
 
 Re-exports [GPhotoAbilities](../interfaces/GPhotoAbilities.md)
+
+___
+
+### GPhotoCaptureKeep
+
+Re-exports [GPhotoCaptureKeep](capture.md#gphotocapturekeep)
+
+___
+
+### GPhotoCaptureOptions
+
+Re-exports [GPhotoCaptureOptions](../interfaces/capture.GPhotoCaptureOptions.md)
 
 ___
 
@@ -74,9 +91,27 @@ Re-exports [GPhotoListedPort](../interfaces/GPhotoListedPort.md)
 
 ___
 
+### GPhotoLiveview
+
+Re-exports [GPhotoLiveview](../interfaces/capture.GPhotoLiveview.md)
+
+___
+
 ### GPhotoSupportedCamera
 
 Re-exports [GPhotoSupportedCamera](../interfaces/GPhotoSupportedCamera.md)
+
+___
+
+### SaveLocation
+
+Re-exports [SaveLocation](../interfaces/capture.SaveLocation.md)
+
+___
+
+### SaveLocationType
+
+Re-exports [SaveLocationType](capture.md#savelocationtype)
 
 ___
 

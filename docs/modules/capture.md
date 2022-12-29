@@ -15,6 +15,7 @@ A collection of functions for capturing files with a camera.
 ### Interfaces
 
 - [GPhotoCaptureOptions](../interfaces/capture.GPhotoCaptureOptions.md)
+- [GPhotoLiveview](../interfaces/capture.GPhotoLiveview.md)
 - [SaveLocation](../interfaces/capture.SaveLocation.md)
 
 ### Type Aliases
@@ -73,7 +74,7 @@ ___
 
 ### liveview
 
-**liveview**(`cb`, `autoStart?`, `identifier?`): `Promise`<{ `start`: () => `Promise`<`void`\> ; `stop`: () => `Promise`<`void`\>  }\>
+**liveview**(`cb`, `autoStart?`, `identifier?`): `Promise`<[`GPhotoLiveview`](../interfaces/capture.GPhotoLiveview.md)\>
 
 Operate a liveview preview stream from the camera.
 
@@ -97,7 +98,7 @@ await liveview.stop();
 
 #### Returns
 
-`Promise`<{ `start`: () => `Promise`<`void`\> ; `stop`: () => `Promise`<`void`\>  }\>
+`Promise`<[`GPhotoLiveview`](../interfaces/capture.GPhotoLiveview.md)\>
 
 ___
 

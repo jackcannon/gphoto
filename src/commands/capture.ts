@@ -3,7 +3,7 @@ import { GPhotoIdentifier, getIdentifierFlags } from '../utils/identifiers';
 import { runCmd } from '../utils/runCmd';
 import { GPhotoCaptureKeep, GPhotoCaptureOptions, getFlags, getWait } from './capture/options';
 
-export { liveview } from './capture/liveview';
+export { liveview, GPhotoLiveview } from './capture/liveview';
 
 export { GPhotoCaptureKeep, GPhotoCaptureOptions, SaveLocation, SaveLocationType };
 

@@ -4,6 +4,14 @@ gphoto
 
 ## Table of contents
 
+### References
+
+- [GPhotoCaptureKeep](API.md#gphotocapturekeep)
+- [GPhotoCaptureOptions](API.md#gphotocaptureoptions)
+- [GPhotoLiveview](API.md#gphotoliveview)
+- [SaveLocation](API.md#savelocation)
+- [SaveLocationType](API.md#savelocationtype)
+
 ### Namespaces
 
 - [capture](modules/capture.md)
@@ -33,6 +41,36 @@ gphoto
 
 - [GPhotoConfigDataType](API.md#gphotoconfigdatatype)
 - [GPhotoConfigType](API.md#gphotoconfigtype)
+
+## References
+
+### GPhotoCaptureKeep
+
+Re-exports [GPhotoCaptureKeep](modules/capture.md#gphotocapturekeep)
+
+___
+
+### GPhotoCaptureOptions
+
+Re-exports [GPhotoCaptureOptions](interfaces/capture.GPhotoCaptureOptions.md)
+
+___
+
+### GPhotoLiveview
+
+Re-exports [GPhotoLiveview](interfaces/capture.GPhotoLiveview.md)
+
+___
+
+### SaveLocation
+
+Re-exports [SaveLocation](interfaces/capture.SaveLocation.md)
+
+___
+
+### SaveLocationType
+
+Re-exports [SaveLocationType](modules/capture.md#savelocationtype)
 
 ## Functions
 

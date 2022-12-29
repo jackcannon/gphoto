@@ -379,6 +379,21 @@ interface GPhotoCaptureOptions {
 }
 
 /**
+ * A liveview stream with methods for starting and stopping the stream.
+ */
+interface GPhotoLiveview {
+    /**
+     * Start the liveview stream.
+     *
+     * Not needed if `autoStart` is `true`.
+     */
+    start: () => Promise<void>;
+    /**
+     * Stop the stream
+     */
+    stop: () => Promise<void>;
+}
+/**
  * Operate a liveview preview stream from the camera.
  *
  * ```ts
@@ -391,10 +406,7 @@ interface GPhotoCaptureOptions {
  * await liveview.stop();
  * ```
  */
-declare const liveview: (cb: (frame: Buffer) => void, autoStart?: boolean, identifier?: GPhotoIdentifier) => Promise<{
-    start: () => Promise<void>;
-    stop: () => Promise<void>;
-}>;
+declare const liveview: (cb: (frame: Buffer) => void, autoStart?: boolean, identifier?: GPhotoIdentifier) => Promise<GPhotoLiveview>;
 
 /**
  * Capture an image from the camera.
@@ -459,6 +471,7 @@ type capture_SaveLocationType = SaveLocationType;
 declare const capture_image: typeof image;
 declare const capture_preview: typeof preview;
 declare const capture_liveview: typeof liveview;
+type capture_GPhotoLiveview = GPhotoLiveview;
 declare namespace capture {
   export {
     capture_GPhotoCaptureKeep as GPhotoCaptureKeep,
@@ -468,6 +481,7 @@ declare namespace capture {
     capture_image as image,
     capture_preview as preview,
     capture_liveview as liveview,
+    capture_GPhotoLiveview as GPhotoLiveview,
   };
 }
 
@@ -601,6 +615,11 @@ declare const reset: (identifier?: GPhotoIdentifier) => Promise<void>;
 
 declare const gPhoto_config: typeof config;
 declare const gPhoto_capture: typeof capture;
+type gPhoto_GPhotoLiveview = GPhotoLiveview;
+type gPhoto_GPhotoCaptureKeep = GPhotoCaptureKeep;
+type gPhoto_GPhotoCaptureOptions = GPhotoCaptureOptions;
+type gPhoto_SaveLocation = SaveLocation;
+type gPhoto_SaveLocationType = SaveLocationType;
 type gPhoto_GPhotoIdentifier = GPhotoIdentifier;
 type gPhoto_GPhotoConfigValueObj = GPhotoConfigValueObj;
 type gPhoto_GPhotoConfigInfoObj = GPhotoConfigInfoObj;
@@ -620,6 +639,11 @@ declare namespace gPhoto {
   export {
     gPhoto_config as config,
     gPhoto_capture as capture,
+    gPhoto_GPhotoLiveview as GPhotoLiveview,
+    gPhoto_GPhotoCaptureKeep as GPhotoCaptureKeep,
+    gPhoto_GPhotoCaptureOptions as GPhotoCaptureOptions,
+    gPhoto_SaveLocation as SaveLocation,
+    gPhoto_SaveLocationType as SaveLocationType,
     gPhoto_GPhotoIdentifier as GPhotoIdentifier,
     gPhoto_GPhotoConfigValueObj as GPhotoConfigValueObj,
     gPhoto_GPhotoConfigInfoObj as GPhotoConfigInfoObj,
@@ -638,4 +662,4 @@ declare namespace gPhoto {
   };
 }
 
-export { GPhotoAbilities, GPhotoConfigDataType, GPhotoConfigInfo, GPhotoConfigInfoObj, GPhotoConfigType, GPhotoConfigValueObj, GPhotoIdentifier, GPhotoListedPort, GPhotoSupportedCamera, abilities, autoDetect, autofocus, capture, config, gPhoto as default, listCameras, listPorts, reset };
+export { GPhotoAbilities, GPhotoCaptureKeep, GPhotoCaptureOptions, GPhotoConfigDataType, GPhotoConfigInfo, GPhotoConfigInfoObj, GPhotoConfigType, GPhotoConfigValueObj, GPhotoIdentifier, GPhotoListedPort, GPhotoLiveview, GPhotoSupportedCamera, SaveLocation, SaveLocationType, abilities, autoDetect, autofocus, capture, config, gPhoto as default, listCameras, listPorts, reset };

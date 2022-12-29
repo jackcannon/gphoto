@@ -15,5 +15,8 @@ export * from './commands/listCameras';
 export * from './commands/listPorts';
 export * from './commands/reset';
 
+export { GPhotoLiveview } from './commands/capture/liveview';
+export { GPhotoCaptureKeep, GPhotoCaptureOptions } from './commands/capture/options';
+export { SaveLocation, SaveLocationType } from './utils/captureUtils';
 export { GPhotoIdentifier } from './utils/identifiers';
 export { GPhotoConfigValueObj, GPhotoConfigInfoObj, GPhotoConfigInfo, GPhotoConfigDataType, GPhotoConfigType } from './utils/configUtils';

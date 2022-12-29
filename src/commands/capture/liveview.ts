@@ -5,6 +5,23 @@ import { reset } from '../reset';
 import { GPhotoIdentifier } from '../../gPhoto';
 
 /**
+ * A liveview stream with methods for starting and stopping the stream.
+ */
+export interface GPhotoLiveview {
+  /**
+   * Start the liveview stream.
+   *
+   * Not needed if `autoStart` is `true`.
+   */
+  start: () => Promise<void>;
+
+  /**
+   * Stop the stream
+   */
+  stop: () => Promise<void>;
+}
+
+/**
  * Operate a liveview preview stream from the camera.
  *
  * ```ts
@@ -17,20 +34,11 @@ import { GPhotoIdentifier } from '../../gPhoto';
  * await liveview.stop();
  * ```
  */
-export const liveview = async (
-  cb: (frame: Buffer) => void,
-  autoStart: boolean = false,
-  identifier?: GPhotoIdentifier
-): Promise<{ start: () => Promise<void>; stop: () => Promise<void> }> => {
+export const liveview = async (cb: (frame: Buffer) => void, autoStart: boolean = false, identifier?: GPhotoIdentifier): Promise<GPhotoLiveview> => {
   let capture: ProcessPromise<string>;
   let response: http.IncomingMessage;
   let stopPromise: DeferredPromise<void> = null;
 
-  /**
-   * Start the liveview stream.
-   *
-   * Not needed if `autoStart` is `true`.
-   */
   const start = async () => {
     if (capture) {
       await stop();
@@ -93,9 +101,6 @@ export const liveview = async (
     }
   };
 
-  /**
-   * Stop the stream
-   */
   const stop = async () => {
     stopPromise = getDeferred<void>();
 
