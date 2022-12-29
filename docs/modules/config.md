@@ -12,42 +12,45 @@ A collection of functions for managing the configuration of a camera.
 - [getAll](config.md#getall)
 - [getAllInfo](config.md#getallinfo)
 - [getAllValues](config.md#getallvalues)
-- [getInfos](config.md#getinfos)
-- [getSingle](config.md#getsingle)
-- [getSingleInfo](config.md#getsingleinfo)
+- [getInfo](config.md#getinfo)
+- [getValues](config.md#getvalues)
+- [getValuesAsObj](config.md#getvaluesasobj)
 - [list](config.md#list)
-- [set](config.md#set)
-- [setSingle](config.md#setsingle)
+- [setValues](config.md#setvalues)
 
 ## Functions
 
 ### get
 
-**get**(`keys`, `identifier?`): `Promise`<[`GPhotoConfigValueObj`](../interfaces/GPhotoConfigValueObj.md)\>
+**get**(`keys`, `checkIfMissing?`, `identifier?`): `Promise`<{ `info`: [`GPhotoConfigInfoObj`](../interfaces/GPhotoConfigInfoObj.md) ; `values`: [`GPhotoConfigValueObj`](../interfaces/GPhotoConfigValueObj.md)  }\>
 
-Get the values for the provided list of configuration options available on the camera.
+Get the info and values for the provided list of configuration options available on the camera.
+
+If `checkIfMissing` is `true`, then this function will filter out any keys that are not present in config.list()
 
 ```ts
 import gPhoto from 'gphoto';
 
-const values = await gPhoto.config.get([
+const {info, values} = await gPhoto.config.get([
   '/main/imgsettings/iso',
   '/main/capturesettings/shutterspeed2'
 ]);
 
 values['/main/imgsettings/iso']; // '100'
+info['/main/imgsettings/iso'].readonly; // false
 ```
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `keys` | `string`[] |
-| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) |
+| Name | Type | Default value |
+| :------ | :------ | :------ |
+| `keys` | `string`[] | `undefined` |
+| `checkIfMissing` | `boolean` | `false` |
+| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) | `undefined` |
 
 #### Returns
 
-`Promise`<[`GPhotoConfigValueObj`](../interfaces/GPhotoConfigValueObj.md)\>
+`Promise`<{ `info`: [`GPhotoConfigInfoObj`](../interfaces/GPhotoConfigInfoObj.md) ; `values`: [`GPhotoConfigValueObj`](../interfaces/GPhotoConfigValueObj.md)  }\>
 
 ___
 
@@ -130,16 +133,18 @@ values['/main/imgsettings/iso']; // '100'
 
 ___
 
-### getInfos
+### getInfo
 
-**getInfos**(`keys`, `identifier?`): `Promise`<[`GPhotoConfigInfoObj`](../interfaces/GPhotoConfigInfoObj.md)\>
+**getInfo**(`keys`, `checkIfMissing?`, `identifier?`): `Promise`<[`GPhotoConfigInfoObj`](../interfaces/GPhotoConfigInfoObj.md)\>
 
 Get the info for the provided list of configuration options available on the camera.
+
+If `checkIfMissing` is `true`, then this function will filter out any keys that are not present in config.list()
 
 ```ts
 import gPhoto from 'gphoto';
 
-const info = await gPhoto.config.getInfos([
+const info = await gPhoto.config.getInfo([
   '/main/imgsettings/iso',
   '/main/capturesettings/shutterspeed2'
 ]);
@@ -149,10 +154,11 @@ info['/main/imgsettings/iso'].readonly; // false
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `keys` | `string`[] |
-| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) |
+| Name | Type | Default value |
+| :------ | :------ | :------ |
+| `keys` | `string`[] | `undefined` |
+| `checkIfMissing` | `boolean` | `false` |
+| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) | `undefined` |
 
 #### Returns
 
@@ -160,61 +166,77 @@ info['/main/imgsettings/iso'].readonly; // false
 
 ___
 
-### getSingle
+### getValues
 
-**getSingle**(`key`, `identifier?`): `Promise`<[`GPhotoConfigDataType`](../API.md#gphotoconfigdatatype)\>
+**getValues**(`keys`, `checkIfMissing?`, `identifier?`): `Promise`<[`GPhotoConfigDataType`](../API.md#gphotoconfigdatatype)[]\>
 
-Get the value for a single configuration option available on the camera.
+Get the values for the provided list of configuration options available on the camera.
+Returns an array with the values in the same order as the keys provided. Values for invalid keys will be `undefined`.
 
-Hint: use ```get``` or ```getAllValues``` instead if you need to get multiple options at once.
+If `checkIfMissing` is `true`, then this function will filter out any keys that are not present in config.list()
 
 ```ts
 import gPhoto from 'gphoto';
 
-const value = await gPhoto.config.getSingle('/main/imgsettings/iso');
+const values = await gPhoto.config.getValues([
+  '/main/imgsettings/iso',
+  '/main/capturesettings/shutterspeed2'
+]);
 
-value; // '100'
+values[0]; // '100'
+
+const [iso] = values;
+iso; // '100'
 ```
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `key` | `string` |
-| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) |
+| Name | Type | Default value |
+| :------ | :------ | :------ |
+| `keys` | `string`[] | `undefined` |
+| `checkIfMissing` | `boolean` | `false` |
+| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) | `undefined` |
 
 #### Returns
 
-`Promise`<[`GPhotoConfigDataType`](../API.md#gphotoconfigdatatype)\>
+`Promise`<[`GPhotoConfigDataType`](../API.md#gphotoconfigdatatype)[]\>
 
 ___
 
-### getSingleInfo
+### getValuesAsObj
 
-**getSingleInfo**(`key`, `identifier?`): `Promise`<[`GPhotoConfigInfo`](../interfaces/GPhotoConfigInfo.md)\>
+**getValuesAsObj**(`keys`, `checkIfMissing?`, `identifier?`): `Promise`<[`GPhotoConfigValueObj`](../interfaces/GPhotoConfigValueObj.md)\>
 
-Get the info for a single configuration option available on the camera.
+Get the values for the provided list of configuration options available on the camera.
+Returns an object with the keys being the config keys and the values being the config values.
 
-Hint: use ```getInfos``` or ```getAllInfos``` instead if you need to get multiple options at once.
+If `checkIfMissing` is `true`, then this function will filter out any keys that are not present in config.list()
 
 ```ts
 import gPhoto from 'gphoto';
 
-const info = await gPhoto.config.getSingleInfo('/main/imgsettings/iso');
+const values = await gPhoto.config.getValuesAsObj([
+  '/main/imgsettings/iso',
+  '/main/capturesettings/shutterspeed2'
+]);
 
-info.readonly; // false
+values['/main/imgsettings/iso']; // '100'
+
+const {['/main/imgsettings/iso'] as iso} = values;
+iso; // '100'
 ```
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `key` | `string` |
-| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) |
+| Name | Type | Default value |
+| :------ | :------ | :------ |
+| `keys` | `string`[] | `undefined` |
+| `checkIfMissing` | `boolean` | `false` |
+| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) | `undefined` |
 
 #### Returns
 
-`Promise`<[`GPhotoConfigInfo`](../interfaces/GPhotoConfigInfo.md)\>
+`Promise`<[`GPhotoConfigValueObj`](../interfaces/GPhotoConfigValueObj.md)\>
 
 ___
 
@@ -244,63 +266,34 @@ keys; // ['/main/imgsettings/iso', '/main/capturesettings/shutterspeed2', ...]
 
 ___
 
-### set
+### setValues
 
-**set**(`values`, `identifier?`): `Promise`<`void`\>
+**setValues**(`values`, `checkIfMissing?`, `identifier?`): `Promise`<`void`\>
 
 Set values for multiple configuration options on the camera.
+
+If `checkIfMissing` is `true`, then this function will filter out any keys that are not present in config.list()
 
 ```ts
 import gPhoto from 'gphoto';
 
-await gPhoto.config.getSingle('/main/imgsettings/iso'); // '100'
+await gPhoto.config.getValues(['/main/imgsettings/iso']); // ['100']
 
-await gPhoto.config.set({
+await gPhoto.config.setValues({
   '/main/imgsettings/iso': '200',
   '/main/capturesettings/shutterspeed2': '1/100'
 });
 
-await gPhoto.config.getSingle('/main/imgsettings/iso'); // '200'
+await gPhoto.config.getValues(['/main/imgsettings/iso']); // ['200']
 ```
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `values` | `Object` |
-| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) |
-
-#### Returns
-
-`Promise`<`void`\>
-
-___
-
-### setSingle
-
-**setSingle**(`key`, `value`, `identifier?`): `Promise`<`void`\>
-
-Set the value of a single configuration option on the camera.
-
-Hint: use ```set``` instead if you need to set multiple options at once.
-
-```ts
-import gPhoto from 'gphoto';
-
-await gPhoto.config.getSingle('/main/imgsettings/iso'); // '100'
-
-await gPhoto.config.setSingle('/main/imgsettings/iso', '200');
-
-await gPhoto.config.getSingle('/main/imgsettings/iso'); // '200'
-```
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `key` | `string` |
-| `value` | [`GPhotoConfigDataType`](../API.md#gphotoconfigdatatype) |
-| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) |
+| Name | Type | Default value |
+| :------ | :------ | :------ |
+| `values` | `Object` | `undefined` |
+| `checkIfMissing` | `boolean` | `false` |
+| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) | `undefined` |
 
 #### Returns
 

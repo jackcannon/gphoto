@@ -32,6 +32,6 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "swiss-ak": "^1.13.0"
+    "swiss-ak": "^1.14.0"
   }
 }

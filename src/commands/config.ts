@@ -7,10 +7,12 @@ import {
   GPhotoConfigInfoObj,
   GPhotoConfigValueObj,
   convertValueToString,
+  filterOutMissingKeys,
+  filterOutMissingProps,
   getAllConfigInfoAndValues,
   getMultipleConfigInfoAndValues
 } from '../utils/configUtils';
-import { getMultipleFromCache } from '../utils/configCache';
+import { getConfigKeyListFromCache, getMultipleFromConfigInfoCache, setConfigKeyListInCache } from '../utils/configCache';
 
 /**
  * Get a list of all the configuration option keys available on the camera.
@@ -24,11 +26,17 @@ import { getMultipleFromCache } from '../utils/configCache';
  * ```
  */
 export const list = async (identifier?: GPhotoIdentifier): Promise<string[]> => {
+  const cached = getConfigKeyListFromCache(identifier);
+  if (cached) return cached;
+
   const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --list-config`);
   const lines = out
     .split('\n')
     .map((s) => s.trim())
     .filter((s) => s.length);
+
+  setConfigKeyListInCache(lines, identifier);
+
   return lines;
 };
 
@@ -74,43 +82,6 @@ export const getAllInfo = async (identifier?: GPhotoIdentifier): Promise<GPhotoC
 };
 
 /**
- * Get the info for the provided list of configuration options available on the camera.
- *
- * ```ts
- * import gPhoto from 'gphoto';
- *
- * const info = await gPhoto.config.getInfos([
- *   '/main/imgsettings/iso',
- *   '/main/capturesettings/shutterspeed2'
- * ]);
- *
- * info['/main/imgsettings/iso'].readonly; // false
- * ```
- */
-export const getInfos = async (keys: string[], identifier?: GPhotoIdentifier): Promise<GPhotoConfigInfoObj> => {
-  const pairs = await getMultipleConfigInfoAndValues(keys, identifier);
-  return Object.fromEntries(pairs.map(([value, info]) => [info.key, info] as [string, GPhotoConfigInfo]));
-};
-
-/**
- * Get the info for a single configuration option available on the camera.
- *
- * Hint: use ```getInfos``` or ```getAllInfos``` instead if you need to get multiple options at once.
- *
- * ```ts
- * import gPhoto from 'gphoto';
- *
- * const info = await gPhoto.config.getSingleInfo('/main/imgsettings/iso');
- *
- * info.readonly; // false
- * ```
- */
-export const getSingleInfo = async (key: string, identifier?: GPhotoIdentifier): Promise<GPhotoConfigInfo> => {
-  const list = await getInfos([key], identifier);
-  return list[key];
-};
-
-/**
  * Get the values for all the configuration options available on the camera.
  *
  * ```ts
@@ -128,92 +99,155 @@ export const getAllValues = async (identifier?: GPhotoIdentifier): Promise<GPhot
 };
 
 /**
- * Get the values for the provided list of configuration options available on the camera.
+ * Get the info and values for the provided list of configuration options available on the camera.
+ *
+ * If `checkIfMissing` is `true`, then this function will filter out any keys that are not present in config.list()
  *
  * ```ts
  * import gPhoto from 'gphoto';
  *
- * const values = await gPhoto.config.get([
+ * const {info, values} = await gPhoto.config.get([
  *   '/main/imgsettings/iso',
  *   '/main/capturesettings/shutterspeed2'
  * ]);
  *
  * values['/main/imgsettings/iso']; // '100'
+ * info['/main/imgsettings/iso'].readonly; // false
  * ```
  */
-export const get = async (keys: string[], identifier?: GPhotoIdentifier): Promise<GPhotoConfigValueObj> => {
-  const pairs = await getMultipleConfigInfoAndValues(keys, identifier);
-  return Object.fromEntries(pairs.map(([value, info]) => [info.key, value] as [string, GPhotoConfigDataType]));
+export const get = async (
+  keys: string[],
+  checkIfMissing: boolean = false,
+  identifier?: GPhotoIdentifier
+): Promise<{ info: GPhotoConfigInfoObj; values: GPhotoConfigValueObj }> => {
+  const checked = await filterOutMissingKeys(keys, checkIfMissing);
+  const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
+
+  const valuesEntries: [string, GPhotoConfigDataType][] = pairs.map(([value, info]) => [info.key, value]);
+  const infoEntries: [string, GPhotoConfigInfo][] = pairs.map(([value, info]) => [info.key, info]);
+
+  return {
+    info: Object.fromEntries(infoEntries),
+    values: Object.fromEntries(valuesEntries)
+  };
 };
 
 /**
- * Get the value for a single configuration option available on the camera.
+ * Get the info for the provided list of configuration options available on the camera.
  *
- * Hint: use ```get``` or ```getAllValues``` instead if you need to get multiple options at once.
+ * If `checkIfMissing` is `true`, then this function will filter out any keys that are not present in config.list()
  *
  * ```ts
  * import gPhoto from 'gphoto';
  *
- * const value = await gPhoto.config.getSingle('/main/imgsettings/iso');
+ * const info = await gPhoto.config.getInfo([
+ *   '/main/imgsettings/iso',
+ *   '/main/capturesettings/shutterspeed2'
+ * ]);
  *
- * value; // '100'
+ * info['/main/imgsettings/iso'].readonly; // false
  * ```
  */
-export const getSingle = async (key: string, identifier?: GPhotoIdentifier): Promise<GPhotoConfigDataType> => {
-  const list = await get([key], identifier);
-  return list[key];
+export const getInfo = async (keys: string[], checkIfMissing: boolean = false, identifier?: GPhotoIdentifier): Promise<GPhotoConfigInfoObj> => {
+  const checked = await filterOutMissingKeys(keys, checkIfMissing);
+  const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
+  return Object.fromEntries(pairs.map(([value, info]) => [info.key, info] as [string, GPhotoConfigInfo]));
+};
+
+/**
+ * Get the values for the provided list of configuration options available on the camera.
+ * Returns an object with the keys being the config keys and the values being the config values.
+ *
+ * If `checkIfMissing` is `true`, then this function will filter out any keys that are not present in config.list()
+ *
+ * ```ts
+ * import gPhoto from 'gphoto';
+ *
+ * const values = await gPhoto.config.getValuesAsObj([
+ *   '/main/imgsettings/iso',
+ *   '/main/capturesettings/shutterspeed2'
+ * ]);
+ *
+ * values['/main/imgsettings/iso']; // '100'
+ *
+ * const {['/main/imgsettings/iso'] as iso} = values;
+ * iso; // '100'
+ * ```
+ */
+export const getValuesAsObj = async (
+  keys: string[],
+  checkIfMissing: boolean = false,
+  identifier?: GPhotoIdentifier
+): Promise<GPhotoConfigValueObj> => {
+  const checked = await filterOutMissingKeys(keys, checkIfMissing);
+  const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
+  return Object.fromEntries(pairs.map(([value, info]) => [info.key, value] as [string, GPhotoConfigDataType]));
+};
+
+/**
+ * Get the values for the provided list of configuration options available on the camera.
+ * Returns an array with the values in the same order as the keys provided. Values for invalid keys will be `undefined`.
+ *
+ * If `checkIfMissing` is `true`, then this function will filter out any keys that are not present in config.list()
+ *
+ * ```ts
+ * import gPhoto from 'gphoto';
+ *
+ * const values = await gPhoto.config.getValues([
+ *   '/main/imgsettings/iso',
+ *   '/main/capturesettings/shutterspeed2'
+ * ]);
+ *
+ * values[0]; // '100'
+ *
+ * const [iso] = values;
+ * iso; // '100'
+ * ```
+ */
+export const getValues = async (keys: string[], checkIfMissing: boolean = false, identifier?: GPhotoIdentifier): Promise<GPhotoConfigDataType[]> => {
+  const valuesObj = await getValuesAsObj(keys, checkIfMissing, identifier);
+  return keys.map((key) => valuesObj[key]);
 };
 
 /**
  * Set values for multiple configuration options on the camera.
  *
+ * If `checkIfMissing` is `true`, then this function will filter out any keys that are not present in config.list()
+ *
  * ```ts
  * import gPhoto from 'gphoto';
  *
- * await gPhoto.config.getSingle('/main/imgsettings/iso'); // '100'
+ * await gPhoto.config.getValues(['/main/imgsettings/iso']); // ['100']
  *
- * await gPhoto.config.set({
+ * await gPhoto.config.setValues({
  *   '/main/imgsettings/iso': '200',
  *   '/main/capturesettings/shutterspeed2': '1/100'
  * });
  *
- * await gPhoto.config.getSingle('/main/imgsettings/iso'); // '200'
+ * await gPhoto.config.getValues(['/main/imgsettings/iso']); // ['200']
  * ```
  */
-export const set = async (values: { [key: string]: GPhotoConfigDataType }, identifier?: GPhotoIdentifier): Promise<void> => {
-  const keys = Object.keys(values);
-  const cached = getMultipleFromCache(keys);
+export const setValues = async (
+  values: { [key: string]: GPhotoConfigDataType },
+  checkIfMissing: boolean = false,
+  identifier?: GPhotoIdentifier
+): Promise<void> => {
+  const checked = await filterOutMissingProps(values, checkIfMissing);
+
+  const keys = Object.keys(checked);
+  const cached = getMultipleFromConfigInfoCache(keys, identifier);
   const allInfos = Object.values(cached);
   const missing = keys.filter((key) => !cached[key]);
 
   if (missing.length) {
-    const newInfos = await getInfos(missing, identifier);
+    const newInfos = await getInfo(missing, false, identifier);
     allInfos.push(...Object.values(newInfos));
   }
 
-  const flags = Object.entries(values).map(([key, value]) => {
+  const flags = Object.entries(checked).map(([key, value]) => {
     const info = allInfos.find((info) => info && info.key === key);
     const valStr = convertValueToString(value, info.type);
     return `--set-config-value ${wrapQuotes(key)}=${wrapQuotes(valStr)}`;
   });
   await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} ${flags.join(' ')}`);
-};
-
-/**
- * Set the value of a single configuration option on the camera.
- *
- * Hint: use ```set``` instead if you need to set multiple options at once.
- *
- * ```ts
- * import gPhoto from 'gphoto';
- *
- * await gPhoto.config.getSingle('/main/imgsettings/iso'); // '100'
- *
- * await gPhoto.config.setSingle('/main/imgsettings/iso', '200');
- *
- * await gPhoto.config.getSingle('/main/imgsettings/iso'); // '200'
- * ```
- */
-export const setSingle = async (key: string, value: GPhotoConfigDataType, identifier?: GPhotoIdentifier): Promise<void> => {
-  await set({ [key]: value }, identifier);
 };

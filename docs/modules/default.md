@@ -17,6 +17,8 @@
 - [GPhotoSupportedCamera](default.md#gphotosupportedcamera)
 - [abilities](default.md#abilities)
 - [autoDetect](default.md#autodetect)
+- [autofocus](default.md#autofocus)
+- [capture](default.md#capture)
 - [config](default.md#config)
 - [listCameras](default.md#listcameras)
 - [listPorts](default.md#listports)
@@ -87,6 +89,18 @@ ___
 ### autoDetect
 
 Re-exports [autoDetect](../API.md#autodetect)
+
+___
+
+### autofocus
+
+Re-exports [autofocus](../API.md#autofocus)
+
+___
+
+### capture
+
+Re-exports [capture](capture.md)
 
 ___
 

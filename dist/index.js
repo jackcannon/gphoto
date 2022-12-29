@@ -1,6 +1,8 @@
+var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __export = (target, all) => {
   for (var name in all)
@@ -14,6 +16,10 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // src/index.ts
@@ -21,6 +27,8 @@ var src_exports = {};
 __export(src_exports, {
   abilities: () => abilities,
   autoDetect: () => autoDetect,
+  autofocus: () => autofocus,
+  capture: () => capture_exports,
   config: () => config_exports,
   default: () => src_default,
   listCameras: () => listCameras,
@@ -34,6 +42,8 @@ var gPhoto_exports = {};
 __export(gPhoto_exports, {
   abilities: () => abilities,
   autoDetect: () => autoDetect,
+  autofocus: () => autofocus,
+  capture: () => capture_exports,
   config: () => config_exports,
   listCameras: () => listCameras,
   listPorts: () => listPorts,
@@ -47,34 +57,40 @@ __export(config_exports, {
   getAll: () => getAll,
   getAllInfo: () => getAllInfo,
   getAllValues: () => getAllValues,
-  getInfos: () => getInfos,
-  getSingle: () => getSingle,
-  getSingleInfo: () => getSingleInfo,
+  getInfo: () => getInfo,
+  getValues: () => getValues,
+  getValuesAsObj: () => getValuesAsObj,
   list: () => list,
-  set: () => set,
-  setSingle: () => setSingle
+  setValues: () => setValues
 });
 
 // src/utils/runCmd.ts
 var import_child_process = require("child_process");
 var ProcessPromise = class extends Promise {
   constructor(executor) {
-    let process;
+    let process2;
     super((resolve, reject) => {
-      process = executor(resolve, reject);
+      process2 = executor(resolve, reject);
     });
-    this.process = process;
+    this.process = process2;
   }
 };
-var runCmd = (cmd) => new ProcessPromise(
-  (resolve, reject) => (0, import_child_process.exec)(cmd, {}, (err, stdout, stderr) => {
-    if (err) {
-      reject(err);
-      console.error(stderr);
-      return;
+var runCmd = (cmd, dir, printStderr = true) => new ProcessPromise(
+  (resolve, reject) => (0, import_child_process.exec)(
+    cmd,
+    {
+      cwd: dir || process.cwd()
+    },
+    (err, stdout, stderr) => {
+      if (err) {
+        reject(err);
+        if (printStderr)
+          console.error(stderr);
+        return;
+      }
+      return resolve(stdout);
     }
-    return resolve(stdout);
-  })
+  )
 );
 
 // src/utils/wrapQuotes.ts
@@ -99,18 +115,46 @@ var getIdentifierFlags = (identifier) => {
 
 // src/utils/configCache.ts
 var import_swiss_ak = require("swiss-ak");
-var configCache = /* @__PURE__ */ new Map();
-var addToCache = (info) => {
-  configCache.set(info.key, info);
+var caches = {
+  configInfo: /* @__PURE__ */ new Map(),
+  list: /* @__PURE__ */ new Map()
 };
-var getFromCache = (key) => {
-  return configCache.get(key);
+var parseID = (identifer = {}) => identifer.port || identifer.model || "auto";
+var getInfoStore = (id) => {
+  const store = caches.configInfo.get(id);
+  if (store)
+    return store;
+  caches.configInfo.set(id, /* @__PURE__ */ new Map());
+  return caches.configInfo.get(id);
 };
-var getMultipleFromCache = (keys) => {
-  return import_swiss_ak.ObjectUtils.clean(Object.fromEntries((0, import_swiss_ak.zip)(keys, keys.map(getFromCache))));
+var addToConfigInfoCache = (info, identifer) => {
+  const id = parseID(identifer);
+  const store = getInfoStore(id);
+  store.set(info.key, info);
+};
+var getMultipleFromConfigInfoCache = (keys, identifer) => {
+  const id = parseID(identifer);
+  const store = getInfoStore(id);
+  return import_swiss_ak.ObjectUtils.clean(
+    Object.fromEntries(
+      (0, import_swiss_ak.zip)(
+        keys,
+        keys.map((key) => store.get(key))
+      )
+    )
+  );
+};
+var getConfigKeyListFromCache = (identifer) => {
+  const id = parseID(identifer);
+  return caches.list.get(id);
+};
+var setConfigKeyListInCache = (list2, identifer) => {
+  const id = parseID(identifer);
+  caches.list.set(id, list2);
 };
 
 // src/utils/configUtils.ts
+var import_swiss_ak2 = require("swiss-ak");
 var parseCurrentValueString = (value, type) => {
   if (type === "TOGGLE")
     return Number(value) === 2 ? null : Boolean(Number(value));
@@ -129,12 +173,12 @@ var convertValueToString = (value, type) => {
     return value === "now" ? "now" : Math.ceil(Number(value) / 1e3) + "";
   return value + "";
 };
-var parseConfigInfo = (configInfo, knownKeys) => {
+var parseConfigInfo = (configInfo, knownKeys, identifier) => {
   const rawEntries = configInfo.split("\nEND\n").filter((str) => str.replace("\n", "").trim().length);
-  const parsed = rawEntries.map((rawInfo, index) => parseSingleConfigInfo(rawInfo, knownKeys ? knownKeys[index] : void 0));
+  const parsed = rawEntries.map((rawInfo, index) => parseSingleConfigInfo(rawInfo, knownKeys ? knownKeys[index] : void 0, identifier));
   return parsed;
 };
-var parseSingleConfigInfo = (configInfo, knownKey) => {
+var parseSingleConfigInfo = (configInfo, knownKey, identifier) => {
   const lines = configInfo.split("\n").filter((str) => str.trim().length && str.trim() !== "END");
   const key = knownKey ? knownKey : lines[0];
   const rest = knownKey ? lines : lines.slice(1);
@@ -174,24 +218,40 @@ var parseSingleConfigInfo = (configInfo, knownKey) => {
     if (propName === "printable") {
     }
   }
-  addToCache(config);
+  addToConfigInfoCache(config, identifier);
   const current = parseCurrentValueString(currentStr, config.type);
   return [current, config];
 };
+var filterOutMissingKeys = async (keys, condition) => {
+  if (!condition)
+    return keys;
+  const list2 = await list();
+  return keys.filter((key) => list2.includes(key));
+};
+var filterOutMissingProps = async (obj, condition) => {
+  if (!condition)
+    return obj;
+  const list2 = await list();
+  return import_swiss_ak2.ObjectUtils.filter(obj, (key) => list2.includes(key));
+};
 var getAllConfigInfoAndValues = async (identifier) => {
   const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --list-all-config`);
-  return parseConfigInfo(out);
+  return parseConfigInfo(out, void 0, identifier);
 };
 var getMultipleConfigInfoAndValues = async (keys, identifier) => {
   const flags = keys.map((key) => `--get-config ${wrapQuotes(key)}`);
   const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} ${flags.join(" ")}`);
-  return parseConfigInfo(out, keys);
+  return parseConfigInfo(out, keys, identifier);
 };
 
 // src/commands/config.ts
 var list = async (identifier) => {
+  const cached = getConfigKeyListFromCache(identifier);
+  if (cached)
+    return cached;
   const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --list-config`);
   const lines = out.split("\n").map((s) => s.trim()).filter((s) => s.length);
+  setConfigKeyListInCache(lines, identifier);
   return lines;
 };
 var getAll = async (identifier) => {
@@ -208,50 +268,243 @@ var getAllInfo = async (identifier) => {
   const infoEntries = pairs.map(([value, info]) => [info.key, info]);
   return Object.fromEntries(infoEntries);
 };
-var getInfos = async (keys, identifier) => {
-  const pairs = await getMultipleConfigInfoAndValues(keys, identifier);
-  return Object.fromEntries(pairs.map(([value, info]) => [info.key, info]));
-};
-var getSingleInfo = async (key, identifier) => {
-  const list2 = await getInfos([key], identifier);
-  return list2[key];
-};
 var getAllValues = async (identifier) => {
   const pairs = await getAllConfigInfoAndValues(identifier);
   const valuesEntries = pairs.map(([value, info]) => [info.key, value]);
   return Object.fromEntries(valuesEntries);
 };
-var get = async (keys, identifier) => {
-  const pairs = await getMultipleConfigInfoAndValues(keys, identifier);
+var get = async (keys, checkIfMissing = false, identifier) => {
+  const checked = await filterOutMissingKeys(keys, checkIfMissing);
+  const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
+  const valuesEntries = pairs.map(([value, info]) => [info.key, value]);
+  const infoEntries = pairs.map(([value, info]) => [info.key, info]);
+  return {
+    info: Object.fromEntries(infoEntries),
+    values: Object.fromEntries(valuesEntries)
+  };
+};
+var getInfo = async (keys, checkIfMissing = false, identifier) => {
+  const checked = await filterOutMissingKeys(keys, checkIfMissing);
+  const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
+  return Object.fromEntries(pairs.map(([value, info]) => [info.key, info]));
+};
+var getValuesAsObj = async (keys, checkIfMissing = false, identifier) => {
+  const checked = await filterOutMissingKeys(keys, checkIfMissing);
+  const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
   return Object.fromEntries(pairs.map(([value, info]) => [info.key, value]));
 };
-var getSingle = async (key, identifier) => {
-  const list2 = await get([key], identifier);
-  return list2[key];
+var getValues = async (keys, checkIfMissing = false, identifier) => {
+  const valuesObj = await getValuesAsObj(keys, checkIfMissing, identifier);
+  return keys.map((key) => valuesObj[key]);
 };
-var set = async (values, identifier) => {
-  const keys = Object.keys(values);
-  const cached = getMultipleFromCache(keys);
+var setValues = async (values, checkIfMissing = false, identifier) => {
+  const checked = await filterOutMissingProps(values, checkIfMissing);
+  const keys = Object.keys(checked);
+  const cached = getMultipleFromConfigInfoCache(keys, identifier);
   const allInfos = Object.values(cached);
   const missing = keys.filter((key) => !cached[key]);
   if (missing.length) {
-    const newInfos = await getInfos(missing, identifier);
+    const newInfos = await getInfo(missing, false, identifier);
     allInfos.push(...Object.values(newInfos));
   }
-  const flags = Object.entries(values).map(([key, value]) => {
+  const flags = Object.entries(checked).map(([key, value]) => {
     const info = allInfos.find((info2) => info2 && info2.key === key);
     const valStr = convertValueToString(value, info.type);
     return `--set-config-value ${wrapQuotes(key)}=${wrapQuotes(valStr)}`;
   });
   await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} ${flags.join(" ")}`);
 };
-var setSingle = async (key, value, identifier) => {
-  await set({ [key]: value }, identifier);
+
+// src/commands/capture.ts
+var capture_exports = {};
+__export(capture_exports, {
+  image: () => image,
+  liveview: () => liveview,
+  preview: () => preview
+});
+
+// src/utils/captureUtils.ts
+var import_path = __toESM(require("path"));
+var getDirAndFile = (line) => {
+  const pathOrFile = line.replace(/(New file is in location|Saving file as|Deleting file|Keeping file|on the camera)/g, "").trim();
+  const dir = (pathOrFile.match(/(.*[\\\/])*/) || [])[0].replace(/[\\\/]$/, "");
+  const filename = (pathOrFile.match(/[^\\\/]*$/) || [])[0];
+  return { dir, filename };
+};
+var parseCaptureStdout = (stdout, localDir) => {
+  if (!localDir)
+    localDir = process.cwd();
+  let savedFiles = [];
+  const lines = stdout.split("\n").map((line) => line.trim()).filter((line) => line.length);
+  for (let line of lines) {
+    const type = line.endsWith("on the camera") ? "camera" : "local";
+    let { dir, filename } = getDirAndFile(line);
+    if (type === "local")
+      dir = localDir;
+    const full = import_path.default.join(dir, filename);
+    if (line.startsWith("New file is in location") || line.startsWith("Saving file as")) {
+      savedFiles.push({ type, dir, filename, full });
+    }
+    if (line.startsWith("Deleting file")) {
+      savedFiles = savedFiles.filter((s) => s.filename !== filename && s.type !== type && s.dir !== dir);
+    }
+  }
+  return savedFiles;
+};
+
+// src/commands/capture/options.ts
+var import_swiss_ak3 = require("swiss-ak");
+var getFlags = (options) => {
+  const flags = [];
+  if (options.filename)
+    flags.push(`--filename=${wrapQuotes(options.filename)}`);
+  if (options.filenumber)
+    flags.push(`--filenumber=${options.filenumber}`);
+  if (options.download !== false && options.keep !== void 0) {
+    if (options.keep === true)
+      flags.push(`--keep`);
+    if (options.keep === false)
+      flags.push(`--no-keep`);
+    if (options.keep === "raw")
+      flags.push(`--keep-raw`);
+  }
+  if (options.bulb)
+    flags.push(`--bulb=${import_swiss_ak3.fn.fixFloat(options.bulb / 1e3)}`);
+  if (options.frames)
+    flags.push(`--frames=${options.frames}`);
+  if (options.interval)
+    flags.push(`--interval=${import_swiss_ak3.fn.fixFloat(options.interval / 1e3)}`);
+  if (options.onlyNew)
+    flags.push(`--new`);
+  if (options.skipExisting)
+    flags.push(`--skip-existing`);
+  return flags.join(" ");
+};
+var getWait = async (options) => {
+  if (options.wait) {
+    if (options.wait > import_swiss_ak3.YEAR) {
+      await (0, import_swiss_ak3.waitUntil)(options.wait);
+    } else {
+      await (0, import_swiss_ak3.waitFor)(options.wait);
+    }
+  }
+};
+
+// src/commands/capture/liveview.ts
+var import_http = __toESM(require("http"));
+var import_swiss_ak5 = require("swiss-ak");
+
+// src/commands/reset.ts
+var import_swiss_ak4 = require("swiss-ak");
+var reset = async (identifier) => {
+  await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --reset`);
+  await (0, import_swiss_ak4.wait)(0);
+};
+
+// src/commands/capture/liveview.ts
+var liveview = async (cb, autoStart = false, identifier) => {
+  let capture;
+  let response;
+  let stopPromise = null;
+  const start = async () => {
+    if (capture) {
+      await stop();
+    }
+    await reset(identifier);
+    const uniqueId = ("0".repeat(10) + Math.random().toString(36).slice(2)).slice(-10);
+    const port = 65535 - 1337 - 420 - 69;
+    const url = `http://localhost:${port}/${uniqueId}.jpg`;
+    const cmd = `gphoto2 --capture-movie --stdout | ffmpeg -re -i pipe:0 -listen 1 -f mjpeg ${url}`;
+    try {
+      capture = runCmd(cmd, void 0, false);
+      const handleError = async () => {
+        capture.process.on("close", () => {
+          if (stopPromise) {
+            stopPromise.resolve();
+          }
+        });
+        try {
+          await capture;
+        } catch (err) {
+        }
+      };
+      handleError();
+      const attemptConnection = async () => {
+        try {
+          await (0, import_swiss_ak5.wait)((0, import_swiss_ak5.seconds)(1));
+          await new Promise((resolve, reject) => {
+            let resolved = false;
+            const getter = import_http.default.get(url, (res) => {
+              res.on("data", (chunk) => {
+                cb(chunk);
+                if (!resolved) {
+                  response = res;
+                  resolved = true;
+                  resolve();
+                }
+              });
+              res.on("error", reject);
+            });
+            getter.on("error", reject);
+          });
+        } catch (err) {
+          await attemptConnection();
+        }
+      };
+      await attemptConnection();
+    } catch (err) {
+    }
+  };
+  const stop = async () => {
+    stopPromise = (0, import_swiss_ak5.getDeferred)();
+    if (capture) {
+      try {
+        capture.process.disconnect();
+        capture.process.kill();
+      } catch (err) {
+      }
+      capture = void 0;
+    }
+    if (response) {
+      try {
+        response.destroy();
+        response = null;
+      } catch (err) {
+      }
+    }
+    await stopPromise.promise;
+    await reset(identifier);
+  };
+  if (autoStart) {
+    await start();
+  }
+  return { start, stop };
+};
+
+// src/commands/capture.ts
+var image = async (options = {}, identifier) => {
+  const mainFlag = options.download !== false ? "--capture-image-and-download" : "--capture-image";
+  const flags = getFlags(options);
+  const cmd = `gphoto2 ${getIdentifierFlags(identifier)} ${mainFlag} ${flags} --force-overwrite`;
+  await getWait(options);
+  const out = await runCmd(cmd, options.directory);
+  return parseCaptureStdout(out, options.directory);
+};
+var preview = async (options = {}, identifier) => {
+  let opts = options;
+  if (options.filename) {
+    opts = { ...options, filename: options.filename.replace(/%C/g, "jpg") };
+  }
+  const flags = getFlags(opts);
+  const cmd = `gphoto2 ${getIdentifierFlags(identifier)} --capture-preview ${flags} --force-overwrite`;
+  await getWait(options);
+  const out = await runCmd(cmd, options.directory);
+  return parseCaptureStdout(out, options.directory);
 };
 
 // src/commands/abilities.ts
-var import_swiss_ak2 = require("swiss-ak");
-var toCamelCase = (input) => input.toLowerCase().replace(/[^A-Za-z0-9 ]/g, "").split(/\s+/g).map((word, index) => index ? import_swiss_ak2.fn.capitalise(word) : word).join("");
+var import_swiss_ak6 = require("swiss-ak");
+var toCamelCase = (input) => input.toLowerCase().replace(/[^A-Za-z0-9 ]/g, "").split(/\s+/g).map((word, index) => index ? import_swiss_ak6.fn.capitalise(word) : word).join("");
 var keyDictionary = {
   abilitiesForCamera: "model"
 };
@@ -302,7 +555,7 @@ var abilities = async (identifier) => {
 };
 
 // src/utils/readTable.ts
-var import_swiss_ak3 = require("swiss-ak");
+var import_swiss_ak7 = require("swiss-ak");
 var readTable = (out, propertyNames) => {
   const lines = out.split("\n");
   const sepIndex = lines.findIndex((line) => line.trim().startsWith("-----"));
@@ -312,7 +565,7 @@ var readTable = (out, propertyNames) => {
   const properties = propertyNames || readLine(head).map((name) => name.toLowerCase().replace(/[^A-Za-z0-9]/g, "-"));
   const objs = rows.filter((line) => line.trim().length).map((line) => {
     const values = readLine(line);
-    return Object.fromEntries((0, import_swiss_ak3.zip)(properties, values));
+    return Object.fromEntries((0, import_swiss_ak7.zip)(properties, values));
   });
   return objs;
 };
@@ -322,6 +575,37 @@ var autoDetect = async () => {
   const out = await runCmd("gphoto2 --auto-detect");
   const cameras = readTable(out, ["model", "port"]);
   return cameras;
+};
+
+// src/commands/autofocus.ts
+var import_swiss_ak8 = require("swiss-ak");
+var findBestAFMode = (info, initial) => {
+  return info.choices.find((choice) => choice.toLowerCase().startsWith("af-s")) || info.choices.find((choice) => choice.toLowerCase().startsWith("af")) || info.choices.find((choice) => choice.toLowerCase().startsWith("a")) || initial;
+};
+var KNOWN_FOCUSMODE_KEYS = ["/main/capturesettings/focusmode", "/main/capturesettings/focusmode2"];
+var autofocus = async (overrideManual, identifier) => {
+  let originalFocusModes = KNOWN_FOCUSMODE_KEYS.map(() => void 0);
+  if (overrideManual) {
+    const { info, values } = await get(KNOWN_FOCUSMODE_KEYS, true, identifier);
+    const focusModeInfos = KNOWN_FOCUSMODE_KEYS.map((key) => info[key]);
+    const focusModeValues = KNOWN_FOCUSMODE_KEYS.map((key) => values[key]);
+    if (focusModeValues.some((v) => v && v.toLowerCase().startsWith("m"))) {
+      originalFocusModes = focusModeValues;
+      const newFocusModeValues = KNOWN_FOCUSMODE_KEYS.map(
+        (key, i) => {
+          var _a;
+          return ((_a = focusModeValues[i]) == null ? void 0 : _a.toLowerCase().startsWith("m")) ? findBestAFMode(focusModeInfos[i], focusModeValues[i]) : void 0;
+        }
+      );
+      const newValues = Object.fromEntries((0, import_swiss_ak8.zip)(KNOWN_FOCUSMODE_KEYS, newFocusModeValues));
+      await setValues(import_swiss_ak8.ObjectUtils.clean(newValues), true, identifier);
+    }
+  }
+  await setValues({ "/actions/autofocusdrive": true }, true, identifier);
+  if (overrideManual && originalFocusModes.some((v) => v !== void 0)) {
+    const newValues = Object.fromEntries((0, import_swiss_ak8.zip)(KNOWN_FOCUSMODE_KEYS, originalFocusModes));
+    await setValues(import_swiss_ak8.ObjectUtils.clean(newValues), true, identifier);
+  }
 };
 
 // src/commands/listCameras.ts
@@ -346,19 +630,14 @@ var listPorts = async () => {
   return cameras;
 };
 
-// src/commands/reset.ts
-var import_swiss_ak4 = require("swiss-ak");
-var reset = async (identifier) => {
-  await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --reset`);
-  await (0, import_swiss_ak4.wait)(0);
-};
-
 // src/index.ts
 var src_default = gPhoto_exports;
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   abilities,
   autoDetect,
+  autofocus,
+  capture,
   config,
   listCameras,
   listPorts,

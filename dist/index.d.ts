@@ -114,35 +114,6 @@ declare const getAll: (identifier?: GPhotoIdentifier) => Promise<{
  */
 declare const getAllInfo: (identifier?: GPhotoIdentifier) => Promise<GPhotoConfigInfoObj>;
 /**
- * Get the info for the provided list of configuration options available on the camera.
- *
- * ```ts
- * import gPhoto from 'gphoto';
- *
- * const info = await gPhoto.config.getInfos([
- *   '/main/imgsettings/iso',
- *   '/main/capturesettings/shutterspeed2'
- * ]);
- *
- * info['/main/imgsettings/iso'].readonly; // false
- * ```
- */
-declare const getInfos: (keys: string[], identifier?: GPhotoIdentifier) => Promise<GPhotoConfigInfoObj>;
-/**
- * Get the info for a single configuration option available on the camera.
- *
- * Hint: use ```getInfos``` or ```getAllInfos``` instead if you need to get multiple options at once.
- *
- * ```ts
- * import gPhoto from 'gphoto';
- *
- * const info = await gPhoto.config.getSingleInfo('/main/imgsettings/iso');
- *
- * info.readonly; // false
- * ```
- */
-declare const getSingleInfo: (key: string, identifier?: GPhotoIdentifier) => Promise<GPhotoConfigInfo>;
-/**
  * Get the values for all the configuration options available on the camera.
  *
  * ```ts
@@ -155,92 +126,348 @@ declare const getSingleInfo: (key: string, identifier?: GPhotoIdentifier) => Pro
  */
 declare const getAllValues: (identifier?: GPhotoIdentifier) => Promise<GPhotoConfigValueObj>;
 /**
- * Get the values for the provided list of configuration options available on the camera.
+ * Get the info and values for the provided list of configuration options available on the camera.
+ *
+ * If `checkIfMissing` is `true`, then this function will filter out any keys that are not present in config.list()
  *
  * ```ts
  * import gPhoto from 'gphoto';
  *
- * const values = await gPhoto.config.get([
+ * const {info, values} = await gPhoto.config.get([
  *   '/main/imgsettings/iso',
  *   '/main/capturesettings/shutterspeed2'
  * ]);
  *
  * values['/main/imgsettings/iso']; // '100'
+ * info['/main/imgsettings/iso'].readonly; // false
  * ```
  */
-declare const get: (keys: string[], identifier?: GPhotoIdentifier) => Promise<GPhotoConfigValueObj>;
+declare const get: (keys: string[], checkIfMissing?: boolean, identifier?: GPhotoIdentifier) => Promise<{
+    info: GPhotoConfigInfoObj;
+    values: GPhotoConfigValueObj;
+}>;
 /**
- * Get the value for a single configuration option available on the camera.
+ * Get the info for the provided list of configuration options available on the camera.
  *
- * Hint: use ```get``` or ```getAllValues``` instead if you need to get multiple options at once.
+ * If `checkIfMissing` is `true`, then this function will filter out any keys that are not present in config.list()
  *
  * ```ts
  * import gPhoto from 'gphoto';
  *
- * const value = await gPhoto.config.getSingle('/main/imgsettings/iso');
+ * const info = await gPhoto.config.getInfo([
+ *   '/main/imgsettings/iso',
+ *   '/main/capturesettings/shutterspeed2'
+ * ]);
  *
- * value; // '100'
+ * info['/main/imgsettings/iso'].readonly; // false
  * ```
  */
-declare const getSingle: (key: string, identifier?: GPhotoIdentifier) => Promise<GPhotoConfigDataType>;
+declare const getInfo: (keys: string[], checkIfMissing?: boolean, identifier?: GPhotoIdentifier) => Promise<GPhotoConfigInfoObj>;
+/**
+ * Get the values for the provided list of configuration options available on the camera.
+ * Returns an object with the keys being the config keys and the values being the config values.
+ *
+ * If `checkIfMissing` is `true`, then this function will filter out any keys that are not present in config.list()
+ *
+ * ```ts
+ * import gPhoto from 'gphoto';
+ *
+ * const values = await gPhoto.config.getValuesAsObj([
+ *   '/main/imgsettings/iso',
+ *   '/main/capturesettings/shutterspeed2'
+ * ]);
+ *
+ * values['/main/imgsettings/iso']; // '100'
+ *
+ * const {['/main/imgsettings/iso'] as iso} = values;
+ * iso; // '100'
+ * ```
+ */
+declare const getValuesAsObj: (keys: string[], checkIfMissing?: boolean, identifier?: GPhotoIdentifier) => Promise<GPhotoConfigValueObj>;
+/**
+ * Get the values for the provided list of configuration options available on the camera.
+ * Returns an array with the values in the same order as the keys provided. Values for invalid keys will be `undefined`.
+ *
+ * If `checkIfMissing` is `true`, then this function will filter out any keys that are not present in config.list()
+ *
+ * ```ts
+ * import gPhoto from 'gphoto';
+ *
+ * const values = await gPhoto.config.getValues([
+ *   '/main/imgsettings/iso',
+ *   '/main/capturesettings/shutterspeed2'
+ * ]);
+ *
+ * values[0]; // '100'
+ *
+ * const [iso] = values;
+ * iso; // '100'
+ * ```
+ */
+declare const getValues: (keys: string[], checkIfMissing?: boolean, identifier?: GPhotoIdentifier) => Promise<GPhotoConfigDataType[]>;
 /**
  * Set values for multiple configuration options on the camera.
  *
+ * If `checkIfMissing` is `true`, then this function will filter out any keys that are not present in config.list()
+ *
  * ```ts
  * import gPhoto from 'gphoto';
  *
- * await gPhoto.config.getSingle('/main/imgsettings/iso'); // '100'
+ * await gPhoto.config.getValues(['/main/imgsettings/iso']); // ['100']
  *
- * await gPhoto.config.set({
+ * await gPhoto.config.setValues({
  *   '/main/imgsettings/iso': '200',
  *   '/main/capturesettings/shutterspeed2': '1/100'
  * });
  *
- * await gPhoto.config.getSingle('/main/imgsettings/iso'); // '200'
+ * await gPhoto.config.getValues(['/main/imgsettings/iso']); // ['200']
  * ```
  */
-declare const set: (values: {
+declare const setValues: (values: {
     [key: string]: GPhotoConfigDataType;
-}, identifier?: GPhotoIdentifier) => Promise<void>;
-/**
- * Set the value of a single configuration option on the camera.
- *
- * Hint: use ```set``` instead if you need to set multiple options at once.
- *
- * ```ts
- * import gPhoto from 'gphoto';
- *
- * await gPhoto.config.getSingle('/main/imgsettings/iso'); // '100'
- *
- * await gPhoto.config.setSingle('/main/imgsettings/iso', '200');
- *
- * await gPhoto.config.getSingle('/main/imgsettings/iso'); // '200'
- * ```
- */
-declare const setSingle: (key: string, value: GPhotoConfigDataType, identifier?: GPhotoIdentifier) => Promise<void>;
+}, checkIfMissing?: boolean, identifier?: GPhotoIdentifier) => Promise<void>;
 
 declare const config_list: typeof list;
 declare const config_getAll: typeof getAll;
 declare const config_getAllInfo: typeof getAllInfo;
-declare const config_getInfos: typeof getInfos;
-declare const config_getSingleInfo: typeof getSingleInfo;
 declare const config_getAllValues: typeof getAllValues;
 declare const config_get: typeof get;
-declare const config_getSingle: typeof getSingle;
-declare const config_set: typeof set;
-declare const config_setSingle: typeof setSingle;
+declare const config_getInfo: typeof getInfo;
+declare const config_getValuesAsObj: typeof getValuesAsObj;
+declare const config_getValues: typeof getValues;
+declare const config_setValues: typeof setValues;
 declare namespace config {
   export {
     config_list as list,
     config_getAll as getAll,
     config_getAllInfo as getAllInfo,
-    config_getInfos as getInfos,
-    config_getSingleInfo as getSingleInfo,
     config_getAllValues as getAllValues,
     config_get as get,
-    config_getSingle as getSingle,
-    config_set as set,
-    config_setSingle as setSingle,
+    config_getInfo as getInfo,
+    config_getValuesAsObj as getValuesAsObj,
+    config_getValues as getValues,
+    config_setValues as setValues,
+  };
+}
+
+/**
+ * Whether a file was saved to the camera or downloaded to the local machine.
+ */
+declare type SaveLocationType = 'camera' | 'local';
+/**
+ * Information on a file that was saved to the camera or downloaded to the local machine.
+ */
+interface SaveLocation {
+    /**
+     * Whether a file was saved to the camera or downloaded to the local machine.
+     */
+    type: SaveLocationType;
+    /**
+     * The directory the file was saved to.
+     */
+    dir: string;
+    /**
+     * The filename of the file, including extension.
+     */
+    filename: string;
+    /**
+     * The full path to the file.
+     */
+    full: string;
+}
+
+/**
+ * Used GPhotoCaptureOptions.keep
+ *
+ * | Value   | Description                                                                                             |
+ * | ------- | ------------------------------------------------------------------------------------------------------- |
+ * | `true`  | Keep the images on the memory card of the camera.                                                       |
+ * | `false` | Don't keep the images on the memory card of the camera after downloading them during capture. (default) |
+ * | `'raw'` | Keep the RAW images on the memory card of the camera, but still download the JPEG images.               |
+ */
+declare type GPhotoCaptureKeep = boolean | 'raw';
+/**
+ * Options for capture commands
+ */
+interface GPhotoCaptureOptions {
+    /**
+     * Whether to download the file after capturing it.
+     *
+     * Default: `true`
+     */
+    download?: boolean;
+    /**
+     * Where to download the file to. Runs the command from this directory.
+     *
+     * Default: `process.cwd()`
+     */
+    directory?: string;
+    /**
+     * When downloading files from the camera, specify the file name or file name pattern to use when storing the downloaded file on the local disk.
+     *
+     * You can include the following variables:
+     *
+     * | Variable | Description                                                                 |
+     * | -------- | --------------------------------------------------------------------------- |
+     * | `%n`     | A iterating number. Also see `filenumber`                                   |
+     * | `%03n`   | Same as `%n` above, but padded to be 3 wide. e.g. `007`. Num can be changed |
+     * | `%C`     | The native file extension (e.g. `JPG` or `NEF`)                             |
+     * | `%a`     | locale's abbreviated weekday name (e.g., Sun)                               |
+     * | `%A`     | locale's full weekday name (e.g., Sunday)                                   |
+     * | `%b`     | locale's abbreviated month name (e.g., Jan)                                 |
+     * | `%B`     | locale's full month name (e.g., January)                                    |
+     * | `%d`     | day of month (e.g., 01)                                                     |
+     * | `%H`     | hour (00..23)                                                               |
+     * | `%I`     | hour (01..12)                                                               |
+     * | `%j`     | day of year (001..366)                                                      |
+     * | `%k`     | hour, space padded ( 0..23); same as %\_H                                   |
+     * | `%l`     | hour, space padded ( 1..12); same as %\_I                                   |
+     * | `%m`     | month (01..12)                                                              |
+     * | `%M`     | minute (00..59)                                                             |
+     * | `%S`     | second (00..60)                                                             |
+     * | `%y`     | last two digits of year (00..99)                                            |
+     * | `%%`     | a literal `%` character                                                     |
+     */
+    filename?: string;
+    /**
+     * If you specify the filename using the `filename` option and use the `%n` pattern, this pattern usually starts at 1.
+     * For incremental usage, you can use `filenumber` to have it start at another number
+     */
+    filenumber?: number;
+    /**
+     * Used for --capture-image-and-download or interval capture
+     *
+     * | Value   | Description                                                                                             |
+     * | ------- | ------------------------------------------------------------------------------------------------------- |
+     * | `true`  | Keep the images on the memory card of the camera.                                                       |
+     * | `false` | Don't keep the images on the memory card of the camera after downloading them during capture. (default) |
+     * | `'raw'` | Keep the RAW images on the memory card of the camera, but still download the JPEG images.               |
+     */
+    keep?: GPhotoCaptureKeep;
+    /**
+     * Bulb mode long-exposure captures. Time in milliseconds.
+     *
+     * This option may not be supported by all cameras or all versions of gphoto2
+     */
+    bulb?: number;
+    /**
+     * Number of frames to capture in one run. Default is infinite number of frames.
+     */
+    frames?: number;
+    /**
+     * Time between capture of multiple frames. Time in milliseconds.
+     */
+    interval?: number;
+    /**
+     * Only get not already downloaded files.
+     *
+     * This option depends on camera support of flagging already downloaded images and is not available for all drivers.
+     */
+    onlyNew?: boolean;
+    /**
+     * Skip files if they exist already on the local directory.
+     */
+    skipExisting?: boolean;
+    /**
+     * Wait for a certain amount of time before capturing the image.
+     *
+     * Time in milliseconds.
+     *
+     * If value is longer than 1 Year (31557600000), it will be interpreted as a target Unix timestamp, and the command will wait until that time.
+     */
+    wait?: number;
+}
+
+/**
+ * Operate a liveview preview stream from the camera.
+ *
+ * ```ts
+ * const liveview = await gPhoto.capture.liveview(async (frame: Buffer) => {
+ *   // do something with the frame; display it, save it, bake it in a pie, whatever
+ * }, true);
+ *
+ * // ...
+ *
+ * await liveview.stop();
+ * ```
+ */
+declare const liveview: (cb: (frame: Buffer) => void, autoStart?: boolean, identifier?: GPhotoIdentifier) => Promise<{
+    start: () => Promise<void>;
+    stop: () => Promise<void>;
+}>;
+
+/**
+ * Capture an image from the camera.
+ *
+ * ```ts
+ * import gPhoto from 'gphoto';
+ *
+ * const files = await gPhoto.capture.image({
+ *   download: true,
+ *   keep: 'raw',
+ *   filename: 'test-%n.%C',
+ * });
+ * // 'test-1.JPG' saved to current directory
+ * // 'DSC_0001.NEF' saved to camera
+ *
+ * files;
+ * // [
+ * //   {
+ * //     type: 'local',
+ * //     dir: '/Users/user/cool-project',
+ * //     filename: 'image-1.JPG',
+ * //     full: '/Users/user/cool-project/test-1.JPG'
+ * //   },
+ * //   {
+ * //     type: 'camera',
+ * //     dir: '/store_00010001/DCIM/100D5200',
+ * //     filename: 'DSC_0001.NEF',
+ * //     full: '/store_00010001/DCIM/100D5200/DSC_0001.NEF'
+ * //   }
+ * // ]
+ * ```
+ */
+declare const image: (options?: GPhotoCaptureOptions, identifier?: GPhotoIdentifier) => Promise<SaveLocation[]>;
+/**
+ * Capture a quick preview image from the camera.
+ *
+ * ```ts
+ * import gPhoto from 'gphoto';
+ *
+ * const files = await gPhoto.capture.preview({
+ *   filename: 'preview-%n.%C'
+ * });
+ * // 'thumb_preview-1.jpg' saved to current directory
+ *
+ * files;
+ * // [
+ * //   {
+ * //     type: 'local',
+ * //     dir: '/Users/user/cool-project',
+ * //     filename: 'thumb_preview-1.jpg',
+ * //     full: '/Users/user/cool-project/thumb_preview-1.jpg'
+ * //   }
+ * // ]
+ * ```
+ */
+declare const preview: (options?: GPhotoCaptureOptions, identifier?: GPhotoIdentifier) => Promise<SaveLocation[]>;
+
+type capture_GPhotoCaptureKeep = GPhotoCaptureKeep;
+type capture_GPhotoCaptureOptions = GPhotoCaptureOptions;
+type capture_SaveLocation = SaveLocation;
+type capture_SaveLocationType = SaveLocationType;
+declare const capture_image: typeof image;
+declare const capture_preview: typeof preview;
+declare const capture_liveview: typeof liveview;
+declare namespace capture {
+  export {
+    capture_GPhotoCaptureKeep as GPhotoCaptureKeep,
+    capture_GPhotoCaptureOptions as GPhotoCaptureOptions,
+    capture_SaveLocation as SaveLocation,
+    capture_SaveLocationType as SaveLocationType,
+    capture_image as image,
+    capture_preview as preview,
+    capture_liveview as liveview,
   };
 }
 
@@ -289,6 +516,31 @@ declare const abilities: (identifier?: GPhotoIdentifier) => Promise<GPhotoAbilit
  * ```
  */
 declare const autoDetect: () => Promise<GPhotoIdentifier[]>;
+
+/**
+ * Auto-focus the camera (without taking a picture)
+ *
+ * if `overrideManual` is true, and camera is in manual focusing mode, then it will override the manual focus setting, focus the camera, and return to the original focus mode setting
+ *
+ * Overriding may or may not work, depending on the camera.
+ *
+ * ```ts
+ * import gPhoto from 'gphoto';
+ *
+ * await gPhoto.config.setValues({ '/main/capturesettings/focusmode': 'AF-C' }, true); // sets camera to auto focus (continuous) mode
+ * await gPhoto.autofocus(); // camera will autofocus
+ *
+ * // ...
+ *
+ * await gPhoto.config.setValues({ '/main/capturesettings/focusmode': 'Manual' }, true); // sets camera to manual focus mode
+ * await gPhoto.autofocus(); // focus won't change
+ *
+ * await gPhoto.autofocus(true); // camera will autofocus
+ * // focus mode will still be set to manual
+ *
+ * ```
+ */
+declare const autofocus: (overrideManual: boolean, identifier?: GPhotoIdentifier) => Promise<void>;
 
 /**
  * Information about a supported camera model.
@@ -348,6 +600,7 @@ declare const reset: (identifier?: GPhotoIdentifier) => Promise<void>;
  */
 
 declare const gPhoto_config: typeof config;
+declare const gPhoto_capture: typeof capture;
 type gPhoto_GPhotoIdentifier = GPhotoIdentifier;
 type gPhoto_GPhotoConfigValueObj = GPhotoConfigValueObj;
 type gPhoto_GPhotoConfigInfoObj = GPhotoConfigInfoObj;
@@ -357,6 +610,7 @@ type gPhoto_GPhotoConfigType = GPhotoConfigType;
 type gPhoto_GPhotoAbilities = GPhotoAbilities;
 declare const gPhoto_abilities: typeof abilities;
 declare const gPhoto_autoDetect: typeof autoDetect;
+declare const gPhoto_autofocus: typeof autofocus;
 type gPhoto_GPhotoSupportedCamera = GPhotoSupportedCamera;
 declare const gPhoto_listCameras: typeof listCameras;
 type gPhoto_GPhotoListedPort = GPhotoListedPort;
@@ -365,6 +619,7 @@ declare const gPhoto_reset: typeof reset;
 declare namespace gPhoto {
   export {
     gPhoto_config as config,
+    gPhoto_capture as capture,
     gPhoto_GPhotoIdentifier as GPhotoIdentifier,
     gPhoto_GPhotoConfigValueObj as GPhotoConfigValueObj,
     gPhoto_GPhotoConfigInfoObj as GPhotoConfigInfoObj,
@@ -374,6 +629,7 @@ declare namespace gPhoto {
     gPhoto_GPhotoAbilities as GPhotoAbilities,
     gPhoto_abilities as abilities,
     gPhoto_autoDetect as autoDetect,
+    gPhoto_autofocus as autofocus,
     gPhoto_GPhotoSupportedCamera as GPhotoSupportedCamera,
     gPhoto_listCameras as listCameras,
     gPhoto_GPhotoListedPort as GPhotoListedPort,
@@ -382,4 +638,4 @@ declare namespace gPhoto {
   };
 }
 
-export { GPhotoAbilities, GPhotoConfigDataType, GPhotoConfigInfo, GPhotoConfigInfoObj, GPhotoConfigType, GPhotoConfigValueObj, GPhotoIdentifier, GPhotoListedPort, GPhotoSupportedCamera, abilities, autoDetect, config, gPhoto as default, listCameras, listPorts, reset };
+export { GPhotoAbilities, GPhotoConfigDataType, GPhotoConfigInfo, GPhotoConfigInfoObj, GPhotoConfigType, GPhotoConfigValueObj, GPhotoIdentifier, GPhotoListedPort, GPhotoSupportedCamera, abilities, autoDetect, autofocus, capture, config, gPhoto as default, listCameras, listPorts, reset };

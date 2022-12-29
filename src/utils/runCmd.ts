@@ -13,15 +13,21 @@ export class ProcessPromise<T = string> extends Promise<T> {
   }
 }
 
-export const runCmd = (cmd: string): ProcessPromise<string> =>
+export const runCmd = (cmd: string, dir?: string, printStderr: boolean = true): ProcessPromise<string> =>
   new ProcessPromise((resolve, reject) =>
-    exec(cmd, {}, (err, stdout, stderr) => {
-      if (err) {
-        reject(err);
-        console.error(stderr);
-        return;
-      }
+    exec(
+      cmd,
+      {
+        cwd: dir || process.cwd()
+      },
+      (err, stdout, stderr) => {
+        if (err) {
+          reject(err);
+          if (printStderr) console.error(stderr);
+          return;
+        }
 
-      return resolve(stdout);
-    })
+        return resolve(stdout);
+      }
+    )
   );

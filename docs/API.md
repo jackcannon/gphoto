@@ -6,6 +6,7 @@ gphoto
 
 ### Namespaces
 
+- [capture](modules/capture.md)
 - [config](modules/config.md)
 - [default](modules/default.md)
 
@@ -13,6 +14,7 @@ gphoto
 
 - [abilities](API.md#abilities)
 - [autoDetect](API.md#autodetect)
+- [autofocus](API.md#autofocus)
 - [listCameras](API.md#listcameras)
 - [listPorts](API.md#listports)
 - [reset](API.md#reset)
@@ -80,6 +82,45 @@ await gPhoto.config.set({ '/main/imgsettings/iso': '2500' }, cameras[1]);
 #### Returns
 
 `Promise`<[`GPhotoIdentifier`](interfaces/GPhotoIdentifier.md)[]\>
+
+___
+
+### autofocus
+
+**autofocus**(`overrideManual`, `identifier?`): `Promise`<`void`\>
+
+Auto-focus the camera (without taking a picture)
+
+if `overrideManual` is true, and camera is in manual focusing mode, then it will override the manual focus setting, focus the camera, and return to the original focus mode setting
+
+Overriding may or may not work, depending on the camera.
+
+```ts
+import gPhoto from 'gphoto';
+
+await gPhoto.config.setValues({ '/main/capturesettings/focusmode': 'AF-C' }, true); // sets camera to auto focus (continuous) mode
+await gPhoto.autofocus(); // camera will autofocus
+
+// ...
+
+await gPhoto.config.setValues({ '/main/capturesettings/focusmode': 'Manual' }, true); // sets camera to manual focus mode
+await gPhoto.autofocus(); // focus won't change
+
+await gPhoto.autofocus(true); // camera will autofocus
+// focus mode will still be set to manual
+
+```
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `overrideManual` | `boolean` |
+| `identifier?` | [`GPhotoIdentifier`](interfaces/GPhotoIdentifier.md) |
+
+#### Returns
+
+`Promise`<`void`\>
 
 ___
 

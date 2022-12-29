@@ -1,7 +1,9 @@
-import { addToCache } from './configCache';
+import { addToConfigInfoCache } from './configCache';
 import { GPhotoIdentifier, getIdentifierFlags } from './identifiers';
 import { runCmd } from './runCmd';
 import { wrapQuotes } from './wrapQuotes';
+import { list as listFn } from '../commands/config';
+import { ObjectUtils } from 'swiss-ak';
 
 /**
  * Possible data types for a config value.
@@ -84,14 +86,22 @@ export const convertValueToString = (value: GPhotoConfigDataType, type: GPhotoCo
  * Parses the output of `gphoto2 --list-all-config`
  * First line may be key. If not (i.e. --get-config=XXX), it is passed in as knownKey
  */
-export const parseConfigInfo = (configInfo: string, knownKeys?: string[]): [GPhotoConfigDataType, GPhotoConfigInfo][] => {
+export const parseConfigInfo = (
+  configInfo: string,
+  knownKeys?: string[],
+  identifier?: GPhotoIdentifier
+): [GPhotoConfigDataType, GPhotoConfigInfo][] => {
   const rawEntries = configInfo.split('\nEND\n').filter((str) => str.replace('\n', '').trim().length);
-  const parsed = rawEntries.map((rawInfo, index) => parseSingleConfigInfo(rawInfo, knownKeys ? knownKeys[index] : undefined));
+  const parsed = rawEntries.map((rawInfo, index) => parseSingleConfigInfo(rawInfo, knownKeys ? knownKeys[index] : undefined, identifier));
 
   return parsed;
 };
 
-export const parseSingleConfigInfo = (configInfo: string, knownKey?: string): [GPhotoConfigDataType, GPhotoConfigInfo] => {
+export const parseSingleConfigInfo = (
+  configInfo: string,
+  knownKey?: string,
+  identifier?: GPhotoIdentifier
+): [GPhotoConfigDataType, GPhotoConfigInfo] => {
   const lines = configInfo.split('\n').filter((str) => str.trim().length && str.trim() !== 'END');
 
   const key = knownKey ? knownKey : lines[0];
@@ -130,18 +140,29 @@ export const parseSingleConfigInfo = (configInfo: string, knownKey?: string): [G
     }
   }
 
-  addToCache(config); // cheekily cache config info
+  addToConfigInfoCache(config, identifier); // cheekily cache config info
 
   const current: GPhotoConfigDataType = parseCurrentValueString(currentStr, config.type);
 
   return [current, config];
 };
 
+export const filterOutMissingKeys = async (keys: string[], condition: boolean): Promise<string[]> => {
+  if (!condition) return keys;
+  const list = await listFn();
+  return keys.filter((key) => list.includes(key));
+};
+export const filterOutMissingProps = async <T extends Object>(obj: T, condition: boolean): Promise<T> => {
+  if (!condition) return obj;
+  const list = await listFn();
+  return ObjectUtils.filter(obj, (key) => list.includes(key)) as T;
+};
+
 // not public API
 export const getAllConfigInfoAndValues = async (identifier?: GPhotoIdentifier): Promise<[GPhotoConfigDataType, GPhotoConfigInfo][]> => {
   const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --list-all-config`);
 
-  return parseConfigInfo(out);
+  return parseConfigInfo(out, undefined, identifier);
 };
 
 // not public API
@@ -151,5 +172,5 @@ export const getMultipleConfigInfoAndValues = async (
 ): Promise<[GPhotoConfigDataType, GPhotoConfigInfo][]> => {
   const flags = keys.map((key) => `--get-config ${wrapQuotes(key)}`);
   const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} ${flags.join(' ')}`);
-  return parseConfigInfo(out, keys);
+  return parseConfigInfo(out, keys, identifier);
 };
