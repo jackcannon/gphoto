@@ -27,10 +27,13 @@ var src_exports = {};
 __export(src_exports, {
   abilities: () => abilities,
   autoDetect: () => autoDetect,
+  autoDetectWithSerials: () => autoDetectWithSerials,
   autofocus: () => autofocus,
   capture: () => capture_exports,
   config: () => config_exports,
   default: () => src_default,
+  getIdentifierForSerial: () => getIdentifierForSerial,
+  getSerial: () => getSerial,
   listCameras: () => listCameras,
   listPorts: () => listPorts,
   reset: () => reset
@@ -42,9 +45,12 @@ var gPhoto_exports = {};
 __export(gPhoto_exports, {
   abilities: () => abilities,
   autoDetect: () => autoDetect,
+  autoDetectWithSerials: () => autoDetectWithSerials,
   autofocus: () => autofocus,
   capture: () => capture_exports,
   config: () => config_exports,
+  getIdentifierForSerial: () => getIdentifierForSerial,
+  getSerial: () => getSerial,
   listCameras: () => listCameras,
   listPorts: () => listPorts,
   reset: () => reset
@@ -392,13 +398,58 @@ var getWait = async (options) => {
 
 // src/commands/capture/liveview.ts
 var import_http = __toESM(require("http"));
-var import_swiss_ak5 = require("swiss-ak");
+var import_swiss_ak7 = require("swiss-ak");
 
 // src/commands/reset.ts
+var import_swiss_ak6 = require("swiss-ak");
+
+// src/utils/readTable.ts
 var import_swiss_ak4 = require("swiss-ak");
+var readTable = (out, propertyNames) => {
+  const lines = out.split("\n");
+  const sepIndex = lines.findIndex((line) => line.trim().startsWith("-----"));
+  const head = lines[sepIndex - 1];
+  const rows = lines.slice(sepIndex + 1);
+  const readLine = (line) => line.trim().split(/\s{3,}/);
+  const properties = propertyNames || readLine(head).map((name) => name.toLowerCase().replace(/[^A-Za-z0-9]/g, "-"));
+  const objs = rows.filter((line) => line.trim().length).map((line) => {
+    const values = readLine(line);
+    return Object.fromEntries((0, import_swiss_ak4.zip)(properties, values));
+  });
+  return objs;
+};
+
+// src/commands/autoDetect.ts
+var import_swiss_ak5 = require("swiss-ak");
+var autoDetect = async () => {
+  const out = await runCmd("gphoto2 --auto-detect");
+  const cameras = readTable(out, ["model", "port"]);
+  return cameras;
+};
+var getSerial = async (identifier) => {
+  const [serial] = await getValues(["serialnumber"], false, identifier);
+  return serial;
+};
+var autoDetectWithSerials = async () => {
+  const cameras = await autoDetect();
+  return import_swiss_ak5.PromiseUtils.mapLimit(4, cameras, async (camera) => {
+    const serial = await getSerial(camera);
+    return { ...camera, serial };
+  });
+};
+var getIdentifierForSerial = async (serial) => {
+  const cameras = await autoDetectWithSerials();
+  const camera = cameras.find((camera2) => camera2.serial === serial);
+  return camera;
+};
+
+// src/commands/reset.ts
 var reset = async (identifier) => {
+  const serial = await getSerial(identifier);
   await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --reset`);
-  await (0, import_swiss_ak4.wait)(0);
+  const result = await getIdentifierForSerial(serial);
+  await (0, import_swiss_ak6.wait)(50);
+  return result;
 };
 
 // src/commands/capture/liveview.ts
@@ -431,7 +482,7 @@ var liveview = async (cb, autoStart = false, identifier) => {
       handleError();
       const attemptConnection = async () => {
         try {
-          await (0, import_swiss_ak5.wait)((0, import_swiss_ak5.seconds)(1));
+          await (0, import_swiss_ak7.wait)((0, import_swiss_ak7.seconds)(1));
           await new Promise((resolve, reject) => {
             let resolved = false;
             const getter = import_http.default.get(url, (res) => {
@@ -456,7 +507,7 @@ var liveview = async (cb, autoStart = false, identifier) => {
     }
   };
   const stop = async () => {
-    stopPromise = (0, import_swiss_ak5.getDeferred)();
+    stopPromise = (0, import_swiss_ak7.getDeferred)();
     if (capture) {
       try {
         capture.process.disconnect();
@@ -503,8 +554,8 @@ var preview = async (options = {}, identifier) => {
 };
 
 // src/commands/abilities.ts
-var import_swiss_ak6 = require("swiss-ak");
-var toCamelCase = (input) => input.toLowerCase().replace(/[^A-Za-z0-9 ]/g, "").split(/\s+/g).map((word, index) => index ? import_swiss_ak6.fn.capitalise(word) : word).join("");
+var import_swiss_ak8 = require("swiss-ak");
+var toCamelCase = (input) => input.toLowerCase().replace(/[^A-Za-z0-9 ]/g, "").split(/\s+/g).map((word, index) => index ? import_swiss_ak8.fn.capitalise(word) : word).join("");
 var keyDictionary = {
   abilitiesForCamera: "model"
 };
@@ -554,31 +605,8 @@ var abilities = async (identifier) => {
   return parseAbilitiesTable(out);
 };
 
-// src/utils/readTable.ts
-var import_swiss_ak7 = require("swiss-ak");
-var readTable = (out, propertyNames) => {
-  const lines = out.split("\n");
-  const sepIndex = lines.findIndex((line) => line.trim().startsWith("-----"));
-  const head = lines[sepIndex - 1];
-  const rows = lines.slice(sepIndex + 1);
-  const readLine = (line) => line.trim().split(/\s{3,}/);
-  const properties = propertyNames || readLine(head).map((name) => name.toLowerCase().replace(/[^A-Za-z0-9]/g, "-"));
-  const objs = rows.filter((line) => line.trim().length).map((line) => {
-    const values = readLine(line);
-    return Object.fromEntries((0, import_swiss_ak7.zip)(properties, values));
-  });
-  return objs;
-};
-
-// src/commands/autoDetect.ts
-var autoDetect = async () => {
-  const out = await runCmd("gphoto2 --auto-detect");
-  const cameras = readTable(out, ["model", "port"]);
-  return cameras;
-};
-
 // src/commands/autofocus.ts
-var import_swiss_ak8 = require("swiss-ak");
+var import_swiss_ak9 = require("swiss-ak");
 var findBestAFMode = (info, initial) => {
   return info.choices.find((choice) => choice.toLowerCase().startsWith("af-s")) || info.choices.find((choice) => choice.toLowerCase().startsWith("af")) || info.choices.find((choice) => choice.toLowerCase().startsWith("a")) || initial;
 };
@@ -597,14 +625,14 @@ var autofocus = async (overrideManual, identifier) => {
           return ((_a = focusModeValues[i]) == null ? void 0 : _a.toLowerCase().startsWith("m")) ? findBestAFMode(focusModeInfos[i], focusModeValues[i]) : void 0;
         }
       );
-      const newValues = Object.fromEntries((0, import_swiss_ak8.zip)(KNOWN_FOCUSMODE_KEYS, newFocusModeValues));
-      await setValues(import_swiss_ak8.ObjectUtils.clean(newValues), true, identifier);
+      const newValues = Object.fromEntries((0, import_swiss_ak9.zip)(KNOWN_FOCUSMODE_KEYS, newFocusModeValues));
+      await setValues(import_swiss_ak9.ObjectUtils.clean(newValues), true, identifier);
     }
   }
   await setValues({ "/actions/autofocusdrive": true }, true, identifier);
   if (overrideManual && originalFocusModes.some((v) => v !== void 0)) {
-    const newValues = Object.fromEntries((0, import_swiss_ak8.zip)(KNOWN_FOCUSMODE_KEYS, originalFocusModes));
-    await setValues(import_swiss_ak8.ObjectUtils.clean(newValues), true, identifier);
+    const newValues = Object.fromEntries((0, import_swiss_ak9.zip)(KNOWN_FOCUSMODE_KEYS, originalFocusModes));
+    await setValues(import_swiss_ak9.ObjectUtils.clean(newValues), true, identifier);
   }
 };
 
@@ -636,9 +664,12 @@ var src_default = gPhoto_exports;
 0 && (module.exports = {
   abilities,
   autoDetect,
+  autoDetectWithSerials,
   autofocus,
   capture,
   config,
+  getIdentifierForSerial,
+  getSerial,
   listCameras,
   listPorts,
   reset

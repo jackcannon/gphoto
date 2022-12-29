@@ -22,9 +22,12 @@
 - [SaveLocationType](default.md#savelocationtype)
 - [abilities](default.md#abilities)
 - [autoDetect](default.md#autodetect)
+- [autoDetectWithSerials](default.md#autodetectwithserials)
 - [autofocus](default.md#autofocus)
 - [capture](default.md#capture)
 - [config](default.md#config)
+- [getIdentifierForSerial](default.md#getidentifierforserial)
+- [getSerial](default.md#getserial)
 - [listCameras](default.md#listcameras)
 - [listPorts](default.md#listports)
 - [reset](default.md#reset)
@@ -127,6 +130,12 @@ Re-exports [autoDetect](../API.md#autodetect)
 
 ___
 
+### autoDetectWithSerials
+
+Re-exports [autoDetectWithSerials](../API.md#autodetectwithserials)
+
+___
+
 ### autofocus
 
 Re-exports [autofocus](../API.md#autofocus)
@@ -142,6 +151,18 @@ ___
 ### config
 
 Re-exports [config](config.md)
+
+___
+
+### getIdentifierForSerial
+
+Re-exports [getIdentifierForSerial](../API.md#getidentifierforserial)
+
+___
+
+### getSerial
+
+Re-exports [getSerial](../API.md#getserial)
 
 ___
 

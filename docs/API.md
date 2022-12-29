@@ -22,7 +22,10 @@ gphoto
 
 - [abilities](API.md#abilities)
 - [autoDetect](API.md#autodetect)
+- [autoDetectWithSerials](API.md#autodetectwithserials)
 - [autofocus](API.md#autofocus)
+- [getIdentifierForSerial](API.md#getidentifierforserial)
+- [getSerial](API.md#getserial)
 - [listCameras](API.md#listcameras)
 - [listPorts](API.md#listports)
 - [reset](API.md#reset)
@@ -123,6 +126,25 @@ await gPhoto.config.set({ '/main/imgsettings/iso': '2500' }, cameras[1]);
 
 ___
 
+### autoDetectWithSerials
+
+**autoDetectWithSerials**(): `Promise`<[`GPhotoIdentifier`](interfaces/GPhotoIdentifier.md)[]\>
+
+Returns a list of connected cameras, with their respective serial numbers
+
+```ts
+import gPhoto from 'gphoto';
+
+const cameras = await gPhoto.autoDetectWithSerials();
+cameras[0].serial; // 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+```
+
+#### Returns
+
+`Promise`<[`GPhotoIdentifier`](interfaces/GPhotoIdentifier.md)[]\>
+
+___
+
 ### autofocus
 
 **autofocus**(`overrideManual`, `identifier?`): `Promise`<`void`\>
@@ -159,6 +181,57 @@ await gPhoto.autofocus(true); // camera will autofocus
 #### Returns
 
 `Promise`<`void`\>
+
+___
+
+### getIdentifierForSerial
+
+**getIdentifierForSerial**(`serial`): `Promise`<[`GPhotoIdentifier`](interfaces/GPhotoIdentifier.md)\>
+
+Get the identifier for a camera with a given serial number
+
+```ts
+import gPhoto from 'gphoto';
+
+const serial = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+const identifier = await gPhoto.getIdentifierForSerial(serial);
+identifier.port; // 'usb:XXX,XXX'
+```
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `serial` | `string` |
+
+#### Returns
+
+`Promise`<[`GPhotoIdentifier`](interfaces/GPhotoIdentifier.md)\>
+
+___
+
+### getSerial
+
+**getSerial**(`identifier?`): `Promise`<`string`\>
+
+Get the serial number of a camera
+
+```ts
+import gPhoto from 'gphoto';
+
+const serial = await gPhoto.getSerial();
+serial; // 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+```
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `identifier?` | [`GPhotoIdentifier`](interfaces/GPhotoIdentifier.md) |
+
+#### Returns
+
+`Promise`<`string`\>
 
 ___
 
@@ -202,13 +275,17 @@ ___
 
 ### reset
 
-**reset**(`identifier?`): `Promise`<`void`\>
+**reset**(`identifier?`): `Promise`<[`GPhotoIdentifier`](interfaces/GPhotoIdentifier.md)\>
 
 Resets the USB port of the camera.
 
 This command resets the USB port of the camera.
 This option is useful if somehow the protocol talking to the camera locked up
 and simulates plugging out and in the camera.
+
+Resetting the camera will change the port it is connected to, affecting the `port` property of the `GPhotoIdentifier` object.
+To maintain consistency, a new `GPhotoIdentifier` object is returned, with an updated `port` property.
+This is quite a timely operation, so it is recommended to use sparingly.
 
 ```ts
 import gPhoto from 'gphoto';
@@ -224,7 +301,7 @@ await gPhoto.reset(); // camera is disconnected and reconnected
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`<[`GPhotoIdentifier`](interfaces/GPhotoIdentifier.md)\>
 
 ## Type Aliases
 

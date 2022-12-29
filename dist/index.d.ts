@@ -14,6 +14,11 @@ interface GPhotoIdentifier {
      * > if you specify ```model```, you must also specify ```port```. Otherwise the ```model``` option will be silently ignored.
      */
     model?: string;
+    /**
+     * The serial number of the camera. Unique to each camera.
+     * Only present when using `autoDetectWithSerials()`.
+     */
+    serial?: string;
 }
 
 /**
@@ -530,6 +535,40 @@ declare const abilities: (identifier?: GPhotoIdentifier) => Promise<GPhotoAbilit
  * ```
  */
 declare const autoDetect: () => Promise<GPhotoIdentifier[]>;
+/**
+ * Get the serial number of a camera
+ *
+ * ```ts
+ * import gPhoto from 'gphoto';
+ *
+ * const serial = await gPhoto.getSerial();
+ * serial; // 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+ * ```
+ */
+declare const getSerial: (identifier?: GPhotoIdentifier) => Promise<string>;
+/**
+ * Returns a list of connected cameras, with their respective serial numbers
+ *
+ * ```ts
+ * import gPhoto from 'gphoto';
+ *
+ * const cameras = await gPhoto.autoDetectWithSerials();
+ * cameras[0].serial; // 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+ * ```
+ */
+declare const autoDetectWithSerials: () => Promise<GPhotoIdentifier[]>;
+/**
+ * Get the identifier for a camera with a given serial number
+ *
+ * ```ts
+ * import gPhoto from 'gphoto';
+ *
+ * const serial = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+ * const identifier = await gPhoto.getIdentifierForSerial(serial);
+ * identifier.port; // 'usb:XXX,XXX'
+ * ```
+ */
+declare const getIdentifierForSerial: (serial: string) => Promise<GPhotoIdentifier>;
 
 /**
  * Auto-focus the camera (without taking a picture)
@@ -601,13 +640,17 @@ declare const listPorts: () => Promise<GPhotoListedPort[]>;
  * This option is useful if somehow the protocol talking to the camera locked up
  * and simulates plugging out and in the camera.
  *
+ * Resetting the camera will change the port it is connected to, affecting the `port` property of the `GPhotoIdentifier` object.
+ * To maintain consistency, a new `GPhotoIdentifier` object is returned, with an updated `port` property.
+ * This is quite a timely operation, so it is recommended to use sparingly.
+ *
  * ```ts
  * import gPhoto from 'gphoto';
  *
  * await gPhoto.reset(); // camera is disconnected and reconnected
  * ```
  */
-declare const reset: (identifier?: GPhotoIdentifier) => Promise<void>;
+declare const reset: (identifier?: GPhotoIdentifier) => Promise<GPhotoIdentifier>;
 
 /**
  * A collection of functions for managing the configuration of a camera.
@@ -629,6 +672,9 @@ type gPhoto_GPhotoConfigType = GPhotoConfigType;
 type gPhoto_GPhotoAbilities = GPhotoAbilities;
 declare const gPhoto_abilities: typeof abilities;
 declare const gPhoto_autoDetect: typeof autoDetect;
+declare const gPhoto_getSerial: typeof getSerial;
+declare const gPhoto_autoDetectWithSerials: typeof autoDetectWithSerials;
+declare const gPhoto_getIdentifierForSerial: typeof getIdentifierForSerial;
 declare const gPhoto_autofocus: typeof autofocus;
 type gPhoto_GPhotoSupportedCamera = GPhotoSupportedCamera;
 declare const gPhoto_listCameras: typeof listCameras;
@@ -653,6 +699,9 @@ declare namespace gPhoto {
     gPhoto_GPhotoAbilities as GPhotoAbilities,
     gPhoto_abilities as abilities,
     gPhoto_autoDetect as autoDetect,
+    gPhoto_getSerial as getSerial,
+    gPhoto_autoDetectWithSerials as autoDetectWithSerials,
+    gPhoto_getIdentifierForSerial as getIdentifierForSerial,
     gPhoto_autofocus as autofocus,
     gPhoto_GPhotoSupportedCamera as GPhotoSupportedCamera,
     gPhoto_listCameras as listCameras,
@@ -662,4 +711,4 @@ declare namespace gPhoto {
   };
 }
 
-export { GPhotoAbilities, GPhotoCaptureKeep, GPhotoCaptureOptions, GPhotoConfigDataType, GPhotoConfigInfo, GPhotoConfigInfoObj, GPhotoConfigType, GPhotoConfigValueObj, GPhotoIdentifier, GPhotoListedPort, GPhotoLiveview, GPhotoSupportedCamera, SaveLocation, SaveLocationType, abilities, autoDetect, autofocus, capture, config, gPhoto as default, listCameras, listPorts, reset };
+export { GPhotoAbilities, GPhotoCaptureKeep, GPhotoCaptureOptions, GPhotoConfigDataType, GPhotoConfigInfo, GPhotoConfigInfoObj, GPhotoConfigType, GPhotoConfigValueObj, GPhotoIdentifier, GPhotoListedPort, GPhotoLiveview, GPhotoSupportedCamera, SaveLocation, SaveLocationType, abilities, autoDetect, autoDetectWithSerials, autofocus, capture, config, gPhoto as default, getIdentifierForSerial, getSerial, listCameras, listPorts, reset };

@@ -13,6 +13,7 @@ From the gphoto2 docs:
 
 - [model](GPhotoIdentifier.md#model)
 - [port](GPhotoIdentifier.md#port)
+- [serial](GPhotoIdentifier.md#serial)
 
 ## Properties
 
@@ -30,3 +31,12 @@ ___
  `Optional` **port**: `string`
 
 The ```port``` value of the camera.
+
+___
+
+### serial
+
+ `Optional` **serial**: `string`
+
+The serial number of the camera. Unique to each camera.
+Only present when using `autoDetectWithSerials()`.

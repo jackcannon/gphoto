@@ -17,6 +17,12 @@ export interface GPhotoIdentifier {
    * > if you specify ```model```, you must also specify ```port```. Otherwise the ```model``` option will be silently ignored.
    */
   model?: string;
+
+  /**
+   * The serial number of the camera. Unique to each camera.
+   * Only present when using `autoDetectWithSerials()`.
+   */
+  serial?: string;
 }
 
 export const getIdentifierFlags = (identifier?: GPhotoIdentifier): string => {

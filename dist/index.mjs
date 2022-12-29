@@ -9,9 +9,12 @@ var gPhoto_exports = {};
 __export(gPhoto_exports, {
   abilities: () => abilities,
   autoDetect: () => autoDetect,
+  autoDetectWithSerials: () => autoDetectWithSerials,
   autofocus: () => autofocus,
   capture: () => capture_exports,
   config: () => config_exports,
+  getIdentifierForSerial: () => getIdentifierForSerial,
+  getSerial: () => getSerial,
   listCameras: () => listCameras,
   listPorts: () => listPorts,
   reset: () => reset
@@ -363,9 +366,54 @@ import { getDeferred, seconds, wait as wait2 } from "swiss-ak";
 
 // src/commands/reset.ts
 import { wait } from "swiss-ak";
+
+// src/utils/readTable.ts
+import { zip as zip2 } from "swiss-ak";
+var readTable = (out, propertyNames) => {
+  const lines = out.split("\n");
+  const sepIndex = lines.findIndex((line) => line.trim().startsWith("-----"));
+  const head = lines[sepIndex - 1];
+  const rows = lines.slice(sepIndex + 1);
+  const readLine = (line) => line.trim().split(/\s{3,}/);
+  const properties = propertyNames || readLine(head).map((name) => name.toLowerCase().replace(/[^A-Za-z0-9]/g, "-"));
+  const objs = rows.filter((line) => line.trim().length).map((line) => {
+    const values = readLine(line);
+    return Object.fromEntries(zip2(properties, values));
+  });
+  return objs;
+};
+
+// src/commands/autoDetect.ts
+import { PromiseUtils } from "swiss-ak";
+var autoDetect = async () => {
+  const out = await runCmd("gphoto2 --auto-detect");
+  const cameras = readTable(out, ["model", "port"]);
+  return cameras;
+};
+var getSerial = async (identifier) => {
+  const [serial] = await getValues(["serialnumber"], false, identifier);
+  return serial;
+};
+var autoDetectWithSerials = async () => {
+  const cameras = await autoDetect();
+  return PromiseUtils.mapLimit(4, cameras, async (camera) => {
+    const serial = await getSerial(camera);
+    return { ...camera, serial };
+  });
+};
+var getIdentifierForSerial = async (serial) => {
+  const cameras = await autoDetectWithSerials();
+  const camera = cameras.find((camera2) => camera2.serial === serial);
+  return camera;
+};
+
+// src/commands/reset.ts
 var reset = async (identifier) => {
+  const serial = await getSerial(identifier);
   await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --reset`);
-  await wait(0);
+  const result = await getIdentifierForSerial(serial);
+  await wait(50);
+  return result;
 };
 
 // src/commands/capture/liveview.ts
@@ -521,29 +569,6 @@ var abilities = async (identifier) => {
   return parseAbilitiesTable(out);
 };
 
-// src/utils/readTable.ts
-import { zip as zip2 } from "swiss-ak";
-var readTable = (out, propertyNames) => {
-  const lines = out.split("\n");
-  const sepIndex = lines.findIndex((line) => line.trim().startsWith("-----"));
-  const head = lines[sepIndex - 1];
-  const rows = lines.slice(sepIndex + 1);
-  const readLine = (line) => line.trim().split(/\s{3,}/);
-  const properties = propertyNames || readLine(head).map((name) => name.toLowerCase().replace(/[^A-Za-z0-9]/g, "-"));
-  const objs = rows.filter((line) => line.trim().length).map((line) => {
-    const values = readLine(line);
-    return Object.fromEntries(zip2(properties, values));
-  });
-  return objs;
-};
-
-// src/commands/autoDetect.ts
-var autoDetect = async () => {
-  const out = await runCmd("gphoto2 --auto-detect");
-  const cameras = readTable(out, ["model", "port"]);
-  return cameras;
-};
-
 // src/commands/autofocus.ts
 import { ObjectUtils as ObjectUtils3, zip as zip3 } from "swiss-ak";
 var findBestAFMode = (info, initial) => {
@@ -602,10 +627,13 @@ var src_default = gPhoto_exports;
 export {
   abilities,
   autoDetect,
+  autoDetectWithSerials,
   autofocus,
   capture_exports as capture,
   config_exports as config,
   src_default as default,
+  getIdentifierForSerial,
+  getSerial,
   listCameras,
   listPorts,
   reset
