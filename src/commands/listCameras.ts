@@ -1,4 +1,4 @@
-import { runCmd } from '../utils/runCmd';
+import { runCmd, runCmdUnqueued } from '../utils/runCmd';
 
 /**
  * Information about a supported camera model.
@@ -19,7 +19,7 @@ export interface GPhotoSupportedCamera {
  * ```
  */
 export const listCameras = async (): Promise<GPhotoSupportedCamera[]> => {
-  const out = await runCmd('gphoto2 --list-cameras');
+  const out = await runCmdUnqueued('gphoto2 --list-cameras');
 
   const lines = out.split('\n');
   const startIndex = lines.findIndex((line) => line.trim().startsWith('Supported cameras:')) + 1;

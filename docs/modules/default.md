@@ -30,6 +30,7 @@
 - [getSerial](default.md#getserial)
 - [listCameras](default.md#listcameras)
 - [listPorts](default.md#listports)
+- [queue](default.md#queue)
 - [reset](default.md#reset)
 
 ## References
@@ -175,6 +176,12 @@ ___
 ### listPorts
 
 Re-exports [listPorts](../API.md#listports)
+
+___
+
+### queue
+
+Re-exports [queue](queue.md)
 
 ___
 

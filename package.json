@@ -19,6 +19,8 @@
   },
   "devDependencies": {
     "@types/node": "^18.11.15",
+    "chalk": "4",
+    "ts-node": "^10.9.1",
     "tsup": "^6.2.1",
     "typedoc": "^0.23.23",
     "typedoc-plugin-markdown": "^3.14.0",
@@ -29,9 +31,10 @@
     "build:dist": "tsup-node src/index.ts --format cjs,esm --dts --clean",
     "build:docs": "typedoc --plugin typedoc-plugin-markdown --entryDocument 'API.md' --readme none --disableSources --hideMembersSymbol --out docs src/index.ts",
     "watch": "yarn build:dist -- --watch src",
+    "example": "sudo ts-node-esm examples/examples.ts",
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "swiss-ak": "^1.14.0"
+    "swiss-ak": "^1.16.0"
   }
 }

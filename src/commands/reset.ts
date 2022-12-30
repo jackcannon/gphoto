@@ -22,7 +22,7 @@ import { getIdentifierForSerial, getSerial } from './autoDetect';
  */
 export const reset = async (identifier?: GPhotoIdentifier): Promise<GPhotoIdentifier> => {
   const serial = await getSerial(identifier);
-  await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --reset`);
+  await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --reset`, identifier);
   const result = await getIdentifierForSerial(serial);
   await wait(50);
   return result;

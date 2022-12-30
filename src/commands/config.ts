@@ -29,7 +29,7 @@ export const list = async (identifier?: GPhotoIdentifier): Promise<string[]> => 
   const cached = getConfigKeyListFromCache(identifier);
   if (cached) return cached;
 
-  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --list-config`);
+  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --list-config`, identifier);
   const lines = out
     .split('\n')
     .map((s) => s.trim())
@@ -38,6 +38,32 @@ export const list = async (identifier?: GPhotoIdentifier): Promise<string[]> => 
   setConfigKeyListInCache(lines, identifier);
 
   return lines;
+};
+
+/**
+ * A function for finding the appropriate config key for a partially known key.
+ *
+ * ```ts
+ * import gPhoto from 'gphoto';
+ *
+ * const keys = await gPhoto.config.findAppropriateConfigKeys(['iso', 'shutterspeed2']);
+ * keys; // ['/main/imgsettings/iso', '/main/capturesettings/shutterspeed2']
+ * ```
+ */
+export const findAppropriateConfigKeys = async (keys: string[], identifier?: GPhotoIdentifier): Promise<string[]> => {
+  const allKeys = await list(identifier);
+
+  return keys.map((key) => {
+    if (allKeys.includes(key)) return key;
+
+    const endsWith = allKeys.find((k) => k.endsWith(key));
+    if (endsWith) return endsWith;
+
+    const hasAfterSlash = allKeys.find((k) => k.includes('/' + key));
+    if (hasAfterSlash) return hasAfterSlash;
+
+    return key;
+  });
 };
 
 /**
@@ -249,5 +275,5 @@ export const setValues = async (
     const valStr = convertValueToString(value, info.type);
     return `--set-config-value ${wrapQuotes(key)}=${wrapQuotes(valStr)}`;
   });
-  await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} ${flags.join(' ')}`);
+  await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} ${flags.join(' ')}`, identifier);
 };

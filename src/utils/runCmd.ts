@@ -1,4 +1,6 @@
 import { ChildProcess, exec } from 'child_process';
+import { GPhotoIdentifier } from './identifiers';
+import { addToQueue } from './queue';
 
 export class ProcessPromise<T = string> extends Promise<T> {
   process: ChildProcess;
@@ -13,7 +15,7 @@ export class ProcessPromise<T = string> extends Promise<T> {
   }
 }
 
-export const runCmd = (cmd: string, dir?: string, printStderr: boolean = true): ProcessPromise<string> =>
+export const runCmdUnqueued = (cmd: string, dir?: string, printStderr: boolean = false): ProcessPromise<string> =>
   new ProcessPromise((resolve, reject) =>
     exec(
       cmd,
@@ -31,3 +33,24 @@ export const runCmd = (cmd: string, dir?: string, printStderr: boolean = true): 
       }
     )
   );
+
+export const runCmd = (cmd: string, identifier: GPhotoIdentifier, dir?: string, printStderr?: boolean): Promise<string> =>
+  addToQueue(identifier, () => runCmdUnqueued(cmd, dir, printStderr));
+
+export const runCmdWithProcess = (
+  cmd: string,
+  identifier: GPhotoIdentifier,
+  dir?: string,
+  printStderr?: boolean
+): Promise<{
+  process: ChildProcess;
+  promise: ProcessPromise<string>;
+}> =>
+  addToQueue(identifier, async () => {
+    const procProm = runCmdUnqueued(cmd, dir, printStderr);
+
+    return {
+      process: procProm.process,
+      promise: procProm
+    };
+  });

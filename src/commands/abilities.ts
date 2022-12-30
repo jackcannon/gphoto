@@ -79,12 +79,12 @@ const parseAbilitiesTable = (out: string): GPhotoAbilities => {
  * import gPhoto from 'gphoto';
  * const abilities = await gPhoto.abilities();
  *
- * console.log(abilities.captureChoices.includes('Image')); // true
- * console.log(abilties.captureChoices.includes('Video')); // false
- * console.log(abilties.deleteSelectedFilesOnCamera); // true
+ * abilities.captureChoices.includes('Image'); // true
+ * abilties.captureChoices.includes('Video'); // false
+ * abilties.deleteSelectedFilesOnCamera; // true
  * ```
  */
 export const abilities = async (identifier?: GPhotoIdentifier): Promise<GPhotoAbilities> => {
-  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --abilities `);
+  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --abilities `, identifier);
   return parseAbilitiesTable(out);
 };

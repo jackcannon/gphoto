@@ -1,4 +1,4 @@
-import { runCmd } from '../utils/runCmd';
+import { runCmd, runCmdUnqueued } from '../utils/runCmd';
 import { readTable } from '../utils/readTable';
 
 /**
@@ -20,7 +20,7 @@ export interface GPhotoListedPort {
  * ```
  */
 export const listPorts = async (): Promise<GPhotoListedPort[]> => {
-  const out = await runCmd('gphoto2 --list-ports');
+  const out = await runCmdUnqueued('gphoto2 --list-ports');
 
   const cameras = readTable<GPhotoListedPort>(out, ['path', 'description']);
 

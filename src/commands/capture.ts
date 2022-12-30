@@ -45,7 +45,7 @@ export const image = async (options: GPhotoCaptureOptions = {}, identifier?: GPh
 
   await getWait(options);
 
-  const out = await runCmd(cmd, options.directory);
+  const out = await runCmd(cmd, identifier, options.directory);
   return parseCaptureStdout(out, options.directory);
 };
 
@@ -82,6 +82,6 @@ export const preview = async (options: GPhotoCaptureOptions = {}, identifier?: G
 
   await getWait(options);
 
-  const out = await runCmd(cmd, options.directory);
+  const out = await runCmd(cmd, identifier, options.directory);
   return parseCaptureStdout(out, options.directory);
 };

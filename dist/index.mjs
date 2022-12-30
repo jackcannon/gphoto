@@ -17,12 +17,14 @@ __export(gPhoto_exports, {
   getSerial: () => getSerial,
   listCameras: () => listCameras,
   listPorts: () => listPorts,
+  queue: () => queue_public_exports,
   reset: () => reset
 });
 
 // src/commands/config.ts
 var config_exports = {};
 __export(config_exports, {
+  findAppropriateConfigKeys: () => findAppropriateConfigKeys,
   get: () => get,
   getAll: () => getAll,
   getAllInfo: () => getAllInfo,
@@ -36,32 +38,9 @@ __export(config_exports, {
 
 // src/utils/runCmd.ts
 import { exec } from "child_process";
-var ProcessPromise = class extends Promise {
-  constructor(executor) {
-    let process2;
-    super((resolve, reject) => {
-      process2 = executor(resolve, reject);
-    });
-    this.process = process2;
-  }
-};
-var runCmd = (cmd, dir, printStderr = true) => new ProcessPromise(
-  (resolve, reject) => exec(
-    cmd,
-    {
-      cwd: dir || process.cwd()
-    },
-    (err, stdout, stderr) => {
-      if (err) {
-        reject(err);
-        if (printStderr)
-          console.error(stderr);
-        return;
-      }
-      return resolve(stdout);
-    }
-  )
-);
+
+// src/utils/queue.ts
+import { QueueManager, seconds } from "swiss-ak";
 
 // src/utils/wrapQuotes.ts
 var wrapQuotes = (pathStr) => {
@@ -82,6 +61,101 @@ var getIdentifierFlags = (identifier) => {
   }
   return result.trim();
 };
+var getID = (identifier) => identifier ? `gphoto__${identifier.model}_${identifier.port}` : `gphoto_DEFAULT`;
+
+// src/utils/liveviewStore.ts
+var liveviewStore = new class LiveviewStore {
+  constructor() {
+    this.store = /* @__PURE__ */ new Map();
+  }
+  get(identifier) {
+    return this.store.get(getID(identifier));
+  }
+  async add(identifier, liveview2) {
+    const existing = this.get(identifier);
+    if (existing && existing.isRunning()) {
+      await existing.stop();
+    }
+    this.store.set(getID(identifier), liveview2);
+  }
+}();
+
+// src/utils/queue.ts
+var isEnabled = true;
+var isLiveviewMgmtEnabled = true;
+var queueManager = new QueueManager(seconds(0.1));
+var pauseLiveviewWrapper = async (identifier, fn3) => {
+  if (!isLiveviewMgmtEnabled)
+    return fn3();
+  const liveview2 = liveviewStore.get(identifier);
+  const isRunning = liveview2 && liveview2.isRunning();
+  if (isRunning) {
+    await liveview2.stop();
+  }
+  const result = await fn3();
+  if (isRunning) {
+    await liveview2.start();
+  }
+  return result;
+};
+var addToQueue = async (identifier, fn3) => {
+  if (!isLiveviewMgmtEnabled)
+    return addToQueueSimple(identifier, fn3);
+  if (!isEnabled)
+    return fn3();
+  return await queueManager.add(getID(identifier), () => pauseLiveviewWrapper(identifier, fn3));
+};
+var addToQueueSimple = async (identifier, fn3) => {
+  if (!isEnabled)
+    return fn3();
+  return queueManager.add(getID(identifier), fn3);
+};
+var enable = () => {
+  isEnabled = true;
+};
+var disable = () => {
+  isEnabled = false;
+};
+var isQueueEnabled = () => isEnabled;
+var enableLiveviewManagement = () => {
+  isLiveviewMgmtEnabled = true;
+};
+var disableLiveviewManagement = () => {
+  isLiveviewMgmtEnabled = false;
+};
+var isLiveviewManagementEnabled = () => isLiveviewMgmtEnabled;
+var setPauseTime = (pauseTime) => {
+  queueManager.setDefaultPauseTime(pauseTime);
+};
+
+// src/utils/runCmd.ts
+var ProcessPromise = class extends Promise {
+  constructor(executor) {
+    let process2;
+    super((resolve, reject) => {
+      process2 = executor(resolve, reject);
+    });
+    this.process = process2;
+  }
+};
+var runCmdUnqueued = (cmd, dir, printStderr = false) => new ProcessPromise(
+  (resolve, reject) => exec(
+    cmd,
+    {
+      cwd: dir || process.cwd()
+    },
+    (err, stdout, stderr) => {
+      if (err) {
+        reject(err);
+        if (printStderr)
+          console.error(stderr);
+        return;
+      }
+      return resolve(stdout);
+    }
+  )
+);
+var runCmd = (cmd, identifier, dir, printStderr) => addToQueue(identifier, () => runCmdUnqueued(cmd, dir, printStderr));
 
 // src/utils/configCache.ts
 import { ObjectUtils, zip } from "swiss-ak";
@@ -205,12 +279,12 @@ var filterOutMissingProps = async (obj, condition) => {
   return ObjectUtils2.filter(obj, (key) => list2.includes(key));
 };
 var getAllConfigInfoAndValues = async (identifier) => {
-  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --list-all-config`);
+  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --list-all-config`, identifier);
   return parseConfigInfo(out, void 0, identifier);
 };
 var getMultipleConfigInfoAndValues = async (keys, identifier) => {
   const flags = keys.map((key) => `--get-config ${wrapQuotes(key)}`);
-  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} ${flags.join(" ")}`);
+  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} ${flags.join(" ")}`, identifier);
   return parseConfigInfo(out, keys, identifier);
 };
 
@@ -219,10 +293,24 @@ var list = async (identifier) => {
   const cached = getConfigKeyListFromCache(identifier);
   if (cached)
     return cached;
-  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --list-config`);
+  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --list-config`, identifier);
   const lines = out.split("\n").map((s) => s.trim()).filter((s) => s.length);
   setConfigKeyListInCache(lines, identifier);
   return lines;
+};
+var findAppropriateConfigKeys = async (keys, identifier) => {
+  const allKeys = await list(identifier);
+  return keys.map((key) => {
+    if (allKeys.includes(key))
+      return key;
+    const endsWith = allKeys.find((k) => k.endsWith(key));
+    if (endsWith)
+      return endsWith;
+    const hasAfterSlash = allKeys.find((k) => k.includes("/" + key));
+    if (hasAfterSlash)
+      return hasAfterSlash;
+    return key;
+  });
 };
 var getAll = async (identifier) => {
   const pairs = await getAllConfigInfoAndValues(identifier);
@@ -282,7 +370,7 @@ var setValues = async (values, checkIfMissing = false, identifier) => {
     const valStr = convertValueToString(value, info.type);
     return `--set-config-value ${wrapQuotes(key)}=${wrapQuotes(valStr)}`;
   });
-  await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} ${flags.join(" ")}`);
+  await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} ${flags.join(" ")}`, identifier);
 };
 
 // src/commands/capture.ts
@@ -362,76 +450,22 @@ var getWait = async (options) => {
 
 // src/commands/capture/liveview.ts
 import http from "http";
-import { getDeferred, seconds, wait as wait2 } from "swiss-ak";
-
-// src/commands/reset.ts
-import { wait } from "swiss-ak";
-
-// src/utils/readTable.ts
-import { zip as zip2 } from "swiss-ak";
-var readTable = (out, propertyNames) => {
-  const lines = out.split("\n");
-  const sepIndex = lines.findIndex((line) => line.trim().startsWith("-----"));
-  const head = lines[sepIndex - 1];
-  const rows = lines.slice(sepIndex + 1);
-  const readLine = (line) => line.trim().split(/\s{3,}/);
-  const properties = propertyNames || readLine(head).map((name) => name.toLowerCase().replace(/[^A-Za-z0-9]/g, "-"));
-  const objs = rows.filter((line) => line.trim().length).map((line) => {
-    const values = readLine(line);
-    return Object.fromEntries(zip2(properties, values));
-  });
-  return objs;
-};
-
-// src/commands/autoDetect.ts
-import { PromiseUtils } from "swiss-ak";
-var autoDetect = async () => {
-  const out = await runCmd("gphoto2 --auto-detect");
-  const cameras = readTable(out, ["model", "port"]);
-  return cameras;
-};
-var getSerial = async (identifier) => {
-  const [serial] = await getValues(["serialnumber"], false, identifier);
-  return serial;
-};
-var autoDetectWithSerials = async () => {
-  const cameras = await autoDetect();
-  return PromiseUtils.mapLimit(4, cameras, async (camera) => {
-    const serial = await getSerial(camera);
-    return { ...camera, serial };
-  });
-};
-var getIdentifierForSerial = async (serial) => {
-  const cameras = await autoDetectWithSerials();
-  const camera = cameras.find((camera2) => camera2.serial === serial);
-  return camera;
-};
-
-// src/commands/reset.ts
-var reset = async (identifier) => {
-  const serial = await getSerial(identifier);
-  await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --reset`);
-  const result = await getIdentifierForSerial(serial);
-  await wait(50);
-  return result;
-};
-
-// src/commands/capture/liveview.ts
-var liveview = async (cb, autoStart = false, identifier) => {
+import { getDeferred, seconds as seconds2, wait } from "swiss-ak";
+var liveview = async (cb, autoStart = false, identifier) => addToQueueSimple(identifier, async () => {
   let capture;
   let response;
   let stopPromise = null;
+  const isRunning = () => !!(capture || response);
   const start = async () => {
-    if (capture) {
+    if (isRunning()) {
       await stop();
     }
-    await reset(identifier);
     const uniqueId = ("0".repeat(10) + Math.random().toString(36).slice(2)).slice(-10);
     const port = 65535 - 1337 - 420 - 69;
     const url = `http://localhost:${port}/${uniqueId}.jpg`;
-    const cmd = `gphoto2 --capture-movie --stdout | ffmpeg -re -i pipe:0 -listen 1 -f mjpeg ${url}`;
+    const cmd = `gphoto2 ${getIdentifierFlags(identifier)} --capture-movie --stdout | ffmpeg -re -i pipe:0 -listen 1 -f mjpeg ${url}`;
     try {
-      capture = runCmd(cmd, void 0, false);
+      capture = runCmdUnqueued(cmd);
       const handleError = async () => {
         capture.process.on("close", () => {
           if (stopPromise) {
@@ -446,7 +480,7 @@ var liveview = async (cb, autoStart = false, identifier) => {
       handleError();
       const attemptConnection = async () => {
         try {
-          await wait2(seconds(1));
+          await wait(seconds2(0.5));
           await new Promise((resolve, reject) => {
             let resolved = false;
             const getter = http.get(url, (res) => {
@@ -488,13 +522,14 @@ var liveview = async (cb, autoStart = false, identifier) => {
       }
     }
     await stopPromise.promise;
-    await reset(identifier);
   };
+  const result = { start, stop, isRunning };
+  await liveviewStore.add(identifier, result);
   if (autoStart) {
     await start();
   }
-  return { start, stop };
-};
+  return result;
+});
 
 // src/commands/capture.ts
 var image = async (options = {}, identifier) => {
@@ -502,7 +537,7 @@ var image = async (options = {}, identifier) => {
   const flags = getFlags(options);
   const cmd = `gphoto2 ${getIdentifierFlags(identifier)} ${mainFlag} ${flags} --force-overwrite`;
   await getWait(options);
-  const out = await runCmd(cmd, options.directory);
+  const out = await runCmd(cmd, identifier, options.directory);
   return parseCaptureStdout(out, options.directory);
 };
 var preview = async (options = {}, identifier) => {
@@ -513,9 +548,21 @@ var preview = async (options = {}, identifier) => {
   const flags = getFlags(opts);
   const cmd = `gphoto2 ${getIdentifierFlags(identifier)} --capture-preview ${flags} --force-overwrite`;
   await getWait(options);
-  const out = await runCmd(cmd, options.directory);
+  const out = await runCmd(cmd, identifier, options.directory);
   return parseCaptureStdout(out, options.directory);
 };
+
+// src/queue-public.ts
+var queue_public_exports = {};
+__export(queue_public_exports, {
+  disable: () => disable,
+  disableLiveviewManagement: () => disableLiveviewManagement,
+  enable: () => enable,
+  enableLiveviewManagement: () => enableLiveviewManagement,
+  isLiveviewManagementEnabled: () => isLiveviewManagementEnabled,
+  isQueueEnabled: () => isQueueEnabled,
+  setPauseTime: () => setPauseTime
+});
 
 // src/commands/abilities.ts
 import { fn as fn2 } from "swiss-ak";
@@ -565,8 +612,48 @@ var parseAbilitiesTable = (out) => {
   return result;
 };
 var abilities = async (identifier) => {
-  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --abilities `);
+  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --abilities `, identifier);
   return parseAbilitiesTable(out);
+};
+
+// src/utils/readTable.ts
+import { zip as zip2 } from "swiss-ak";
+var readTable = (out, propertyNames) => {
+  const lines = out.split("\n");
+  const sepIndex = lines.findIndex((line) => line.trim().startsWith("-----"));
+  const head = lines[sepIndex - 1];
+  const rows = lines.slice(sepIndex + 1);
+  const readLine = (line) => line.trim().split(/\s{3,}/);
+  const properties = propertyNames || readLine(head).map((name) => name.toLowerCase().replace(/[^A-Za-z0-9]/g, "-"));
+  const objs = rows.filter((line) => line.trim().length).map((line) => {
+    const values = readLine(line);
+    return Object.fromEntries(zip2(properties, values));
+  });
+  return objs;
+};
+
+// src/commands/autoDetect.ts
+import { PromiseUtils } from "swiss-ak";
+var autoDetect = async () => {
+  const out = await runCmdUnqueued("gphoto2 --auto-detect");
+  const cameras = readTable(out, ["model", "port"]);
+  return cameras;
+};
+var getSerial = async (identifier) => {
+  const [serial] = await getValues(["serialnumber"], false, identifier);
+  return serial;
+};
+var autoDetectWithSerials = async () => {
+  const cameras = await autoDetect();
+  return PromiseUtils.mapLimit(4, cameras, async (camera) => {
+    const serial = await getSerial(camera);
+    return { ...camera, serial };
+  });
+};
+var getIdentifierForSerial = async (serial) => {
+  const cameras = await autoDetectWithSerials();
+  const camera = cameras.find((camera2) => camera2.serial === serial);
+  return camera;
 };
 
 // src/commands/autofocus.ts
@@ -574,35 +661,36 @@ import { ObjectUtils as ObjectUtils3, zip as zip3 } from "swiss-ak";
 var findBestAFMode = (info, initial) => {
   return info.choices.find((choice) => choice.toLowerCase().startsWith("af-s")) || info.choices.find((choice) => choice.toLowerCase().startsWith("af")) || info.choices.find((choice) => choice.toLowerCase().startsWith("a")) || initial;
 };
-var KNOWN_FOCUSMODE_KEYS = ["/main/capturesettings/focusmode", "/main/capturesettings/focusmode2"];
-var autofocus = async (overrideManual, identifier) => {
-  let originalFocusModes = KNOWN_FOCUSMODE_KEYS.map(() => void 0);
+var autofocus = async (overrideManual, identifier) => pauseLiveviewWrapper(identifier, async () => {
+  const keys = await findAppropriateConfigKeys(["focusmode", "focusmode2"], identifier);
+  const [autofocusdriveKey] = await findAppropriateConfigKeys(["autofocusdrive"], identifier);
+  let original = keys.map(() => void 0);
   if (overrideManual) {
-    const { info, values } = await get(KNOWN_FOCUSMODE_KEYS, true, identifier);
-    const focusModeInfos = KNOWN_FOCUSMODE_KEYS.map((key) => info[key]);
-    const focusModeValues = KNOWN_FOCUSMODE_KEYS.map((key) => values[key]);
-    if (focusModeValues.some((v) => v && v.toLowerCase().startsWith("m"))) {
-      originalFocusModes = focusModeValues;
-      const newFocusModeValues = KNOWN_FOCUSMODE_KEYS.map(
+    const { info, values } = await get(keys, true, identifier);
+    const modeInfos = keys.map((key) => info[key]);
+    const modeValues = keys.map((key) => values[key]);
+    if (modeValues.some((v) => v && v.toLowerCase().startsWith("m"))) {
+      original = modeValues;
+      const newModeValues = keys.map(
         (key, i) => {
           var _a;
-          return ((_a = focusModeValues[i]) == null ? void 0 : _a.toLowerCase().startsWith("m")) ? findBestAFMode(focusModeInfos[i], focusModeValues[i]) : void 0;
+          return ((_a = modeValues[i]) == null ? void 0 : _a.toLowerCase().startsWith("m")) ? findBestAFMode(modeInfos[i], modeValues[i]) : void 0;
         }
       );
-      const newValues = Object.fromEntries(zip3(KNOWN_FOCUSMODE_KEYS, newFocusModeValues));
+      const newValues = Object.fromEntries(zip3(keys, newModeValues));
       await setValues(ObjectUtils3.clean(newValues), true, identifier);
     }
   }
-  await setValues({ "/actions/autofocusdrive": true }, true, identifier);
-  if (overrideManual && originalFocusModes.some((v) => v !== void 0)) {
-    const newValues = Object.fromEntries(zip3(KNOWN_FOCUSMODE_KEYS, originalFocusModes));
+  await setValues({ [autofocusdriveKey]: true }, true, identifier);
+  if (overrideManual && original.some((v) => v !== void 0)) {
+    const newValues = Object.fromEntries(zip3(keys, original));
     await setValues(ObjectUtils3.clean(newValues), true, identifier);
   }
-};
+});
 
 // src/commands/listCameras.ts
 var listCameras = async () => {
-  const out = await runCmd("gphoto2 --list-cameras");
+  const out = await runCmdUnqueued("gphoto2 --list-cameras");
   const lines = out.split("\n");
   const startIndex = lines.findIndex((line) => line.trim().startsWith("Supported cameras:")) + 1;
   const rows = lines.slice(startIndex).map((line) => line.trim().match(/"(.*)"(?: \((.*)\))?/)).filter((match) => match).map(([_match, model, flag]) => {
@@ -617,9 +705,19 @@ var listCameras = async () => {
 
 // src/commands/listPorts.ts
 var listPorts = async () => {
-  const out = await runCmd("gphoto2 --list-ports");
+  const out = await runCmdUnqueued("gphoto2 --list-ports");
   const cameras = readTable(out, ["path", "description"]);
   return cameras;
+};
+
+// src/commands/reset.ts
+import { wait as wait2 } from "swiss-ak";
+var reset = async (identifier) => {
+  const serial = await getSerial(identifier);
+  await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --reset`, identifier);
+  const result = await getIdentifierForSerial(serial);
+  await wait2(50);
+  return result;
 };
 
 // src/index.ts
@@ -636,5 +734,6 @@ export {
   getSerial,
   listCameras,
   listPorts,
+  queue_public_exports as queue,
   reset
 };

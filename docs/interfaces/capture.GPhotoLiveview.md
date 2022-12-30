@@ -10,10 +10,27 @@ A liveview stream with methods for starting and stopping the stream.
 
 ### Properties
 
+- [isRunning](capture.GPhotoLiveview.md#isrunning)
 - [start](capture.GPhotoLiveview.md#start)
 - [stop](capture.GPhotoLiveview.md#stop)
 
 ## Properties
+
+### isRunning
+
+ **isRunning**: () => `boolean`
+
+#### Type declaration
+
+(): `boolean`
+
+Whether the stream is currently running.
+
+##### Returns
+
+`boolean`
+
+___
 
 ### start
 

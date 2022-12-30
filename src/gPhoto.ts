@@ -8,6 +8,11 @@ export * as config from './commands/config';
  */
 export * as capture from './commands/capture';
 
+/**
+ * Controls for the queuing functionality of the library.
+ */
+export * as queue from './queue-public';
+
 export * from './commands/abilities';
 export * from './commands/autoDetect';
 export * from './commands/autofocus';

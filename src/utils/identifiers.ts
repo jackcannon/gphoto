@@ -38,3 +38,5 @@ export const getIdentifierFlags = (identifier?: GPhotoIdentifier): string => {
 
   return result.trim();
 };
+
+export const getID = (identifier?: GPhotoIdentifier) => (identifier ? `gphoto__${identifier.model}_${identifier.port}` : `gphoto_DEFAULT`);

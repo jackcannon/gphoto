@@ -17,6 +17,7 @@ gphoto
 - [capture](modules/capture.md)
 - [config](modules/config.md)
 - [default](modules/default.md)
+- [queue](modules/queue.md)
 
 ### Functions
 
@@ -88,9 +89,9 @@ This all does not query the camera, it uses data provided by the libgphoto2 libr
 import gPhoto from 'gphoto';
 const abilities = await gPhoto.abilities();
 
-console.log(abilities.captureChoices.includes('Image')); // true
-console.log(abilties.captureChoices.includes('Video')); // false
-console.log(abilties.deleteSelectedFilesOnCamera); // true
+abilities.captureChoices.includes('Image'); // true
+abilties.captureChoices.includes('Video'); // false
+abilties.deleteSelectedFilesOnCamera; // true
 ```
 
 #### Parameters

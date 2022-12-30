@@ -91,6 +91,17 @@ interface GPhotoConfigValueObj {
  */
 declare const list: (identifier?: GPhotoIdentifier) => Promise<string[]>;
 /**
+ * A function for finding the appropriate config key for a partially known key.
+ *
+ * ```ts
+ * import gPhoto from 'gphoto';
+ *
+ * const keys = await gPhoto.config.findAppropriateConfigKeys(['iso', 'shutterspeed2']);
+ * keys; // ['/main/imgsettings/iso', '/main/capturesettings/shutterspeed2']
+ * ```
+ */
+declare const findAppropriateConfigKeys: (keys: string[], identifier?: GPhotoIdentifier) => Promise<string[]>;
+/**
  * Get the info and values for all the configuration options available on the camera.
  *
  * ```ts
@@ -233,6 +244,7 @@ declare const setValues: (values: {
 }, checkIfMissing?: boolean, identifier?: GPhotoIdentifier) => Promise<void>;
 
 declare const config_list: typeof list;
+declare const config_findAppropriateConfigKeys: typeof findAppropriateConfigKeys;
 declare const config_getAll: typeof getAll;
 declare const config_getAllInfo: typeof getAllInfo;
 declare const config_getAllValues: typeof getAllValues;
@@ -244,6 +256,7 @@ declare const config_setValues: typeof setValues;
 declare namespace config {
   export {
     config_list as list,
+    config_findAppropriateConfigKeys as findAppropriateConfigKeys,
     config_getAll as getAll,
     config_getAllInfo as getAllInfo,
     config_getAllValues as getAllValues,
@@ -397,7 +410,12 @@ interface GPhotoLiveview {
      * Stop the stream
      */
     stop: () => Promise<void>;
+    /**
+     * Whether the stream is currently running.
+     */
+    isRunning: () => boolean;
 }
+
 /**
  * Operate a liveview preview stream from the camera.
  *
@@ -491,6 +509,68 @@ declare namespace capture {
 }
 
 /**
+ * Enable the queuing functionality. This is enabled by default.
+ */
+declare const enable: () => void;
+/**
+ * Disable the queuing functionality. It is enabled by default.
+ */
+declare const disable: () => void;
+/**
+ * Whether the queuing functionality is enabled.
+ */
+declare const isQueueEnabled: () => boolean;
+/**
+ * Enable the management of liveview streams.
+ *
+ * This stops the liveview stream before a command is executed and starts it again after the command is executed.
+ *
+ * This is enabled by default.
+ */
+declare const enableLiveviewManagement: () => void;
+/**
+ * Disable the management of liveview streams.
+ *
+ * This stops the liveview stream before a command is executed and starts it again after the command is executed.
+ *
+ * This is enabled by default.
+ */
+declare const disableLiveviewManagement: () => void;
+/**
+ * Whether the management of liveview streams is enabled.
+ *
+ * This stops the liveview stream before a command is executed and starts it again after the command is executed.
+ */
+declare const isLiveviewManagementEnabled: () => boolean;
+/**
+ * Change the pause time between queued commands.
+ *
+ * Time in milliseconds.
+ *
+ * Default is `100`
+ */
+declare const setPauseTime: (pauseTime: number) => void;
+
+declare const queuePublic_enable: typeof enable;
+declare const queuePublic_disable: typeof disable;
+declare const queuePublic_isQueueEnabled: typeof isQueueEnabled;
+declare const queuePublic_enableLiveviewManagement: typeof enableLiveviewManagement;
+declare const queuePublic_disableLiveviewManagement: typeof disableLiveviewManagement;
+declare const queuePublic_isLiveviewManagementEnabled: typeof isLiveviewManagementEnabled;
+declare const queuePublic_setPauseTime: typeof setPauseTime;
+declare namespace queuePublic {
+  export {
+    queuePublic_enable as enable,
+    queuePublic_disable as disable,
+    queuePublic_isQueueEnabled as isQueueEnabled,
+    queuePublic_enableLiveviewManagement as enableLiveviewManagement,
+    queuePublic_disableLiveviewManagement as disableLiveviewManagement,
+    queuePublic_isLiveviewManagementEnabled as isLiveviewManagementEnabled,
+    queuePublic_setPauseTime as setPauseTime,
+  };
+}
+
+/**
  * The abilities of a camera. Returned by gPhoto.abilities()
  *
  * Actual properties may not exactly match this interface, it's just a guide.
@@ -515,9 +595,9 @@ interface GPhotoAbilities {
  * import gPhoto from 'gphoto';
  * const abilities = await gPhoto.abilities();
  *
- * console.log(abilities.captureChoices.includes('Image')); // true
- * console.log(abilties.captureChoices.includes('Video')); // false
- * console.log(abilties.deleteSelectedFilesOnCamera); // true
+ * abilities.captureChoices.includes('Image'); // true
+ * abilties.captureChoices.includes('Video'); // false
+ * abilties.deleteSelectedFilesOnCamera; // true
  * ```
  */
 declare const abilities: (identifier?: GPhotoIdentifier) => Promise<GPhotoAbilities>;
@@ -685,6 +765,7 @@ declare namespace gPhoto {
   export {
     gPhoto_config as config,
     gPhoto_capture as capture,
+    queuePublic as queue,
     gPhoto_GPhotoLiveview as GPhotoLiveview,
     gPhoto_GPhotoCaptureKeep as GPhotoCaptureKeep,
     gPhoto_GPhotoCaptureOptions as GPhotoCaptureOptions,
@@ -711,4 +792,4 @@ declare namespace gPhoto {
   };
 }
 
-export { GPhotoAbilities, GPhotoCaptureKeep, GPhotoCaptureOptions, GPhotoConfigDataType, GPhotoConfigInfo, GPhotoConfigInfoObj, GPhotoConfigType, GPhotoConfigValueObj, GPhotoIdentifier, GPhotoListedPort, GPhotoLiveview, GPhotoSupportedCamera, SaveLocation, SaveLocationType, abilities, autoDetect, autoDetectWithSerials, autofocus, capture, config, gPhoto as default, getIdentifierForSerial, getSerial, listCameras, listPorts, reset };
+export { GPhotoAbilities, GPhotoCaptureKeep, GPhotoCaptureOptions, GPhotoConfigDataType, GPhotoConfigInfo, GPhotoConfigInfoObj, GPhotoConfigType, GPhotoConfigValueObj, GPhotoIdentifier, GPhotoListedPort, GPhotoLiveview, GPhotoSupportedCamera, SaveLocation, SaveLocationType, abilities, autoDetect, autoDetectWithSerials, autofocus, capture, config, gPhoto as default, getIdentifierForSerial, getSerial, listCameras, listPorts, queuePublic as queue, reset };

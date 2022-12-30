@@ -8,6 +8,7 @@ A collection of functions for managing the configuration of a camera.
 
 ### Functions
 
+- [findAppropriateConfigKeys](config.md#findappropriateconfigkeys)
 - [get](config.md#get)
 - [getAll](config.md#getall)
 - [getAllInfo](config.md#getallinfo)
@@ -19,6 +20,32 @@ A collection of functions for managing the configuration of a camera.
 - [setValues](config.md#setvalues)
 
 ## Functions
+
+### findAppropriateConfigKeys
+
+**findAppropriateConfigKeys**(`keys`, `identifier?`): `Promise`<`string`[]\>
+
+A function for finding the appropriate config key for a partially known key.
+
+```ts
+import gPhoto from 'gphoto';
+
+const keys = await gPhoto.config.findAppropriateConfigKeys(['iso', 'shutterspeed2']);
+keys; // ['/main/imgsettings/iso', '/main/capturesettings/shutterspeed2']
+```
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `keys` | `string`[] |
+| `identifier?` | [`GPhotoIdentifier`](../interfaces/GPhotoIdentifier.md) |
+
+#### Returns
+
+`Promise`<`string`[]\>
+
+___
 
 ### get
 

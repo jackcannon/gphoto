@@ -2,6 +2,7 @@ import { ObjectUtils, zip } from 'swiss-ak';
 import { GPhotoConfigInfo, GPhotoConfigValueObj } from '../gPhoto';
 import { GPhotoIdentifier } from '../utils/identifiers';
 import * as config from './config';
+import { pauseLiveviewWrapper } from '../utils/queue';
 
 const findBestAFMode = (info: GPhotoConfigInfo, initial: string): string => {
   return (
@@ -11,9 +12,6 @@ const findBestAFMode = (info: GPhotoConfigInfo, initial: string): string => {
     initial
   );
 };
-
-// All known focus mode keys - assumes the values are strings (Manual, AF-S, AF-C, etc)
-const KNOWN_FOCUSMODE_KEYS = ['/main/capturesettings/focusmode', '/main/capturesettings/focusmode2'];
 
 /**
  * Auto-focus the camera (without taking a picture)
@@ -38,31 +36,35 @@ const KNOWN_FOCUSMODE_KEYS = ['/main/capturesettings/focusmode', '/main/captures
  *
  * ```
  */
-export const autofocus = async (overrideManual: boolean, identifier?: GPhotoIdentifier): Promise<void> => {
-  let originalFocusModes: string[] = KNOWN_FOCUSMODE_KEYS.map(() => undefined);
+export const autofocus = async (overrideManual: boolean, identifier?: GPhotoIdentifier): Promise<void> =>
+  pauseLiveviewWrapper(identifier, async () => {
+    const keys = await config.findAppropriateConfigKeys(['focusmode', 'focusmode2'], identifier);
+    const [autofocusdriveKey] = await config.findAppropriateConfigKeys(['autofocusdrive'], identifier);
 
-  if (overrideManual) {
-    const { info, values } = await config.get(KNOWN_FOCUSMODE_KEYS, true, identifier);
+    let original: string[] = keys.map(() => undefined);
 
-    const focusModeInfos = KNOWN_FOCUSMODE_KEYS.map((key) => info[key]);
-    const focusModeValues = KNOWN_FOCUSMODE_KEYS.map((key) => values[key] as string);
+    if (overrideManual) {
+      const { info, values } = await config.get(keys, true, identifier);
 
-    if (focusModeValues.some((v) => v && v.toLowerCase().startsWith('m'))) {
-      originalFocusModes = focusModeValues;
+      const modeInfos = keys.map((key) => info[key]);
+      const modeValues = keys.map((key) => values[key] as string);
 
-      const newFocusModeValues = KNOWN_FOCUSMODE_KEYS.map((key, i) =>
-        focusModeValues[i]?.toLowerCase().startsWith('m') ? findBestAFMode(focusModeInfos[i], focusModeValues[i]) : undefined
-      );
+      if (modeValues.some((v) => v && v.toLowerCase().startsWith('m'))) {
+        original = modeValues;
 
-      const newValues: GPhotoConfigValueObj = Object.fromEntries(zip(KNOWN_FOCUSMODE_KEYS, newFocusModeValues));
+        const newModeValues = keys.map((key, i) =>
+          modeValues[i]?.toLowerCase().startsWith('m') ? findBestAFMode(modeInfos[i], modeValues[i]) : undefined
+        );
+
+        const newValues: GPhotoConfigValueObj = Object.fromEntries(zip(keys, newModeValues));
+        await config.setValues(ObjectUtils.clean(newValues), true, identifier);
+      }
+    }
+
+    await config.setValues({ [autofocusdriveKey]: true }, true, identifier);
+
+    if (overrideManual && original.some((v) => v !== undefined)) {
+      const newValues: GPhotoConfigValueObj = Object.fromEntries(zip(keys, original));
       await config.setValues(ObjectUtils.clean(newValues), true, identifier);
     }
-  }
-
-  await config.setValues({ '/actions/autofocusdrive': true }, true, identifier);
-
-  if (overrideManual && originalFocusModes.some((v) => v !== undefined)) {
-    const newValues: GPhotoConfigValueObj = Object.fromEntries(zip(KNOWN_FOCUSMODE_KEYS, originalFocusModes));
-    await config.setValues(ObjectUtils.clean(newValues), true, identifier);
-  }
-};
+  });

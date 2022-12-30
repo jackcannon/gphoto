@@ -1,4 +1,4 @@
-import { runCmd } from '../utils/runCmd';
+import { runCmd, runCmdUnqueued } from '../utils/runCmd';
 import { readTable } from '../utils/readTable';
 import { GPhotoIdentifier } from '../utils/identifiers';
 import * as config from './config';
@@ -17,7 +17,7 @@ import { PromiseUtils } from 'swiss-ak';
  * ```
  */
 export const autoDetect = async (): Promise<GPhotoIdentifier[]> => {
-  const out = await runCmd('gphoto2 --auto-detect');
+  const out = await runCmdUnqueued('gphoto2 --auto-detect');
 
   const cameras = readTable<GPhotoIdentifier>(out, ['model', 'port']);
 
@@ -51,7 +51,6 @@ export const getSerial = async (identifier?: GPhotoIdentifier): Promise<string> 
  */
 export const autoDetectWithSerials = async (): Promise<GPhotoIdentifier[]> => {
   const cameras = await autoDetect();
-  // console.log(cameras);
 
   return PromiseUtils.mapLimit(4, cameras, async (camera) => {
     const serial = await getSerial(camera);

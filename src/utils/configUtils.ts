@@ -158,19 +158,17 @@ export const filterOutMissingProps = async <T extends Object>(obj: T, condition:
   return ObjectUtils.filter(obj, (key) => list.includes(key)) as T;
 };
 
-// not public API
 export const getAllConfigInfoAndValues = async (identifier?: GPhotoIdentifier): Promise<[GPhotoConfigDataType, GPhotoConfigInfo][]> => {
-  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --list-all-config`);
+  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --list-all-config`, identifier);
 
   return parseConfigInfo(out, undefined, identifier);
 };
 
-// not public API
 export const getMultipleConfigInfoAndValues = async (
   keys: string[],
   identifier?: GPhotoIdentifier
 ): Promise<[GPhotoConfigDataType, GPhotoConfigInfo][]> => {
   const flags = keys.map((key) => `--get-config ${wrapQuotes(key)}`);
-  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} ${flags.join(' ')}`);
+  const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} ${flags.join(' ')}`, identifier);
   return parseConfigInfo(out, keys, identifier);
 };
