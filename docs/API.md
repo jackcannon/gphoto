@@ -30,6 +30,7 @@ gphoto
 - [listCameras](API.md#listcameras)
 - [listPorts](API.md#listports)
 - [reset](API.md#reset)
+- [setErrorHandler](API.md#seterrorhandler)
 
 ### Interfaces
 
@@ -45,6 +46,7 @@ gphoto
 
 - [GPhotoConfigDataType](API.md#gphotoconfigdatatype)
 - [GPhotoConfigType](API.md#gphotoconfigtype)
+- [GPhotoErrorHandler](API.md#gphotoerrorhandler)
 
 ## References
 
@@ -304,6 +306,30 @@ await gPhoto.reset(); // camera is disconnected and reconnected
 
 `Promise`<[`GPhotoIdentifier`](interfaces/GPhotoIdentifier.md)\>
 
+___
+
+### setErrorHandler
+
+**setErrorHandler**(`fn`): `void`
+
+Set a function for handling gphoto2 errors.
+
+On error, the provided function receives a short error message and the full stderr output.
+
+It must return a boolean indicating whether the error should be resolved or rejected.
+
+It can be async.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `fn` | [`GPhotoErrorHandler`](API.md#gphotoerrorhandler) |
+
+#### Returns
+
+`void`
+
 ## Type Aliases
 
 ### GPhotoConfigDataType
@@ -328,3 +354,32 @@ Possible types of a config.
 | 'RANGE'  | `number`          | A number value within a range |
 | 'TEXT'   | `string`          | A text value                  |
 | 'TOGGLE' | `boolean`         | An on/off value               |
+
+___
+
+### GPhotoErrorHandler
+
+ **GPhotoErrorHandler**: (`short`: `string`, `long`: `string`) => `Promise`<`boolean`\> \| `boolean`
+
+#### Type declaration
+
+(`short`, `long`): `Promise`<`boolean`\> \| `boolean`
+
+Function for handling gphoto2 errors.
+
+Receives a short error message and the full stderr output.
+
+Must return a boolean indicating whether the error should be resolved or rejected.
+
+Can be async.
+
+##### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `short` | `string` |
+| `long` | `string` |
+
+##### Returns
+
+`Promise`<`boolean`\> \| `boolean`

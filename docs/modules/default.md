@@ -14,6 +14,7 @@
 - [GPhotoConfigInfoObj](default.md#gphotoconfiginfoobj)
 - [GPhotoConfigType](default.md#gphotoconfigtype)
 - [GPhotoConfigValueObj](default.md#gphotoconfigvalueobj)
+- [GPhotoErrorHandler](default.md#gphotoerrorhandler)
 - [GPhotoIdentifier](default.md#gphotoidentifier)
 - [GPhotoListedPort](default.md#gphotolistedport)
 - [GPhotoLiveview](default.md#gphotoliveview)
@@ -32,6 +33,7 @@
 - [listPorts](default.md#listports)
 - [queue](default.md#queue)
 - [reset](default.md#reset)
+- [setErrorHandler](default.md#seterrorhandler)
 
 ## References
 
@@ -80,6 +82,12 @@ ___
 ### GPhotoConfigValueObj
 
 Re-exports [GPhotoConfigValueObj](../interfaces/GPhotoConfigValueObj.md)
+
+___
+
+### GPhotoErrorHandler
+
+Re-exports [GPhotoErrorHandler](../API.md#gphotoerrorhandler)
 
 ___
 
@@ -188,3 +196,9 @@ ___
 ### reset
 
 Re-exports [reset](../API.md#reset)
+
+___
+
+### setErrorHandler
+
+Re-exports [setErrorHandler](../API.md#seterrorhandler)

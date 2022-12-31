@@ -1,4 +1,4 @@
-import { ObjectUtils, zip } from 'swiss-ak';
+import { ObjectUtils, tryOr, zip } from 'swiss-ak';
 import { GPhotoConfigInfo, GPhotoConfigValueObj } from '../gPhoto';
 import { GPhotoIdentifier } from '../utils/identifiers';
 import * as config from './config';
@@ -61,7 +61,10 @@ export const autofocus = async (overrideManual: boolean, identifier?: GPhotoIden
       }
     }
 
-    await config.setValues({ [autofocusdriveKey]: true }, true, identifier);
+    // This will sometimes 'error' with a message like "Not in focus".
+    // Yeah, no shit mate, that's why I'm trying to focus it.
+    // So we just catch errors for this and ignore it.
+    await tryOr(undefined, () => config.setValues({ [autofocusdriveKey]: true }, true, identifier));
 
     if (overrideManual && original.some((v) => v !== undefined)) {
       const newValues: GPhotoConfigValueObj = Object.fromEntries(zip(keys, original));

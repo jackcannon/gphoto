@@ -132,6 +132,13 @@ const examples = {
 
     ____note('stop liveview');
     await liveview.stop();
+  },
+  error: async () => {
+    gPhoto.setErrorHandler((short: string, long: string) => {
+      console.log(chalk.red('ERROR'), short);
+      return true;
+    });
+    await gPhoto.config.get(['/main/imgsettings/iso'], false, { port: 'NOT A PORT' });
   }
 };
 

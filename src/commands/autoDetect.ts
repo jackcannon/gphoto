@@ -1,4 +1,4 @@
-import { runCmd, runCmdUnqueued } from '../utils/runCmd';
+import { runCmdUnqueued } from '../utils/runCmd';
 import { readTable } from '../utils/readTable';
 import { GPhotoIdentifier } from '../utils/identifiers';
 import * as config from './config';

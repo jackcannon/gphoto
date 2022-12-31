@@ -37,7 +37,8 @@ __export(src_exports, {
   listCameras: () => listCameras,
   listPorts: () => listPorts,
   queue: () => queue_public_exports,
-  reset: () => reset
+  reset: () => reset,
+  setErrorHandler: () => setErrorHandler
 });
 module.exports = __toCommonJS(src_exports);
 
@@ -55,7 +56,8 @@ __export(gPhoto_exports, {
   listCameras: () => listCameras,
   listPorts: () => listPorts,
   queue: () => queue_public_exports,
-  reset: () => reset
+  reset: () => reset,
+  setErrorHandler: () => setErrorHandler
 });
 
 // src/commands/config.ts
@@ -165,6 +167,28 @@ var setPauseTime = (pauseTime) => {
   queueManager.setDefaultPauseTime(pauseTime);
 };
 
+// src/utils/errorHandling.ts
+var errorHandling = {
+  handler: null
+};
+var parseShortErrorMessage = (stderr) => {
+  const lines = stderr.split("\n").map((s) => s.trim()).filter((s) => s);
+  const errIndex1 = lines.findIndex((line) => line.startsWith("*** Error ***"));
+  if (errIndex1 !== -1) {
+    return lines[errIndex1 + 1];
+  }
+  const errIndex2 = lines.findIndex((line) => line.startsWith("*** Error ("));
+  if (errIndex2 !== -1) {
+    const line = lines[errIndex2];
+    const match = line.match(/\*\*\* Error \(-5: \'(Unknown port)\'\) \*\*\*/);
+    return (match == null ? void 0 : match[1]) || (match == null ? void 0 : match[0]) || line;
+  }
+  return "";
+};
+var setErrorHandler = (fn3) => {
+  errorHandling.handler = fn3;
+};
+
 // src/utils/runCmd.ts
 var ProcessPromise = class extends Promise {
   constructor(executor) {
@@ -175,24 +199,32 @@ var ProcessPromise = class extends Promise {
     this.process = process2;
   }
 };
-var runCmdUnqueued = (cmd, dir, printStderr = false) => new ProcessPromise(
+var runCmdUnqueued = (cmd, dir, skipErrorReporting = false) => new ProcessPromise(
   (resolve, reject) => (0, import_child_process.exec)(
     cmd,
     {
       cwd: dir || process.cwd()
     },
-    (err, stdout, stderr) => {
+    async (err, stdout, stderr) => {
       if (err) {
-        reject(err);
-        if (printStderr)
-          console.error(stderr);
+        const shortMsg = parseShortErrorMessage(stderr);
+        if (!skipErrorReporting && errorHandling.handler) {
+          const doResolve = await errorHandling.handler(shortMsg, stderr);
+          if (doResolve) {
+            return resolve("");
+          } else {
+            reject(shortMsg);
+          }
+        } else {
+          reject(shortMsg);
+        }
         return;
       }
       return resolve(stdout);
     }
   )
 );
-var runCmd = (cmd, identifier, dir, printStderr) => addToQueue(identifier, () => runCmdUnqueued(cmd, dir, printStderr));
+var runCmd = (cmd, identifier, dir, skipErrorReporting) => addToQueue(identifier, () => runCmdUnqueued(cmd, dir, skipErrorReporting));
 
 // src/utils/configCache.ts
 var import_swiss_ak2 = require("swiss-ak");
@@ -502,7 +534,7 @@ var liveview = async (cb, autoStart = false, identifier) => addToQueueSimple(ide
     const url = `http://localhost:${port}/${uniqueId}.jpg`;
     const cmd = `gphoto2 ${getIdentifierFlags(identifier)} --capture-movie --stdout | ffmpeg -re -i pipe:0 -listen 1 -f mjpeg ${url}`;
     try {
-      capture = runCmdUnqueued(cmd);
+      capture = runCmdUnqueued(cmd, void 0, true);
       const handleError = async () => {
         capture.process.on("close", () => {
           if (stopPromise) {
@@ -718,7 +750,7 @@ var autofocus = async (overrideManual, identifier) => pauseLiveviewWrapper(ident
       await setValues(import_swiss_ak9.ObjectUtils.clean(newValues), true, identifier);
     }
   }
-  await setValues({ [autofocusdriveKey]: true }, true, identifier);
+  await (0, import_swiss_ak9.tryOr)(void 0, () => setValues({ [autofocusdriveKey]: true }, true, identifier));
   if (overrideManual && original.some((v) => v !== void 0)) {
     const newValues = Object.fromEntries((0, import_swiss_ak9.zip)(keys, original));
     await setValues(import_swiss_ak9.ObjectUtils.clean(newValues), true, identifier);
@@ -772,5 +804,6 @@ var src_default = gPhoto_exports;
   listCameras,
   listPorts,
   queue,
-  reset
+  reset,
+  setErrorHandler
 });

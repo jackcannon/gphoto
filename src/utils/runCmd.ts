@@ -1,6 +1,7 @@
 import { ChildProcess, exec } from 'child_process';
 import { GPhotoIdentifier } from './identifiers';
 import { addToQueue } from './queue';
+import { errorHandling, parseShortErrorMessage } from './errorHandling';
 
 export class ProcessPromise<T = string> extends Promise<T> {
   process: ChildProcess;
@@ -15,17 +16,28 @@ export class ProcessPromise<T = string> extends Promise<T> {
   }
 }
 
-export const runCmdUnqueued = (cmd: string, dir?: string, printStderr: boolean = false): ProcessPromise<string> =>
+export const runCmdUnqueued = (cmd: string, dir?: string, skipErrorReporting: boolean = false): ProcessPromise<string> =>
   new ProcessPromise((resolve, reject) =>
     exec(
       cmd,
       {
         cwd: dir || process.cwd()
       },
-      (err, stdout, stderr) => {
+      async (err, stdout, stderr) => {
         if (err) {
-          reject(err);
-          if (printStderr) console.error(stderr);
+          const shortMsg = parseShortErrorMessage(stderr);
+
+          if (!skipErrorReporting && errorHandling.handler) {
+            const doResolve = await errorHandling.handler(shortMsg, stderr);
+            if (doResolve) {
+              return resolve('');
+            } else {
+              reject(shortMsg);
+            }
+          } else {
+            reject(shortMsg);
+          }
+
           return;
         }
 
@@ -34,20 +46,20 @@ export const runCmdUnqueued = (cmd: string, dir?: string, printStderr: boolean =
     )
   );
 
-export const runCmd = (cmd: string, identifier: GPhotoIdentifier, dir?: string, printStderr?: boolean): Promise<string> =>
-  addToQueue(identifier, () => runCmdUnqueued(cmd, dir, printStderr));
+export const runCmd = (cmd: string, identifier: GPhotoIdentifier, dir?: string, skipErrorReporting?: boolean): Promise<string> =>
+  addToQueue(identifier, () => runCmdUnqueued(cmd, dir, skipErrorReporting));
 
 export const runCmdWithProcess = (
   cmd: string,
   identifier: GPhotoIdentifier,
   dir?: string,
-  printStderr?: boolean
+  skipErrorReporting?: boolean
 ): Promise<{
   process: ChildProcess;
   promise: ProcessPromise<string>;
 }> =>
   addToQueue(identifier, async () => {
-    const procProm = runCmdUnqueued(cmd, dir, printStderr);
+    const procProm = runCmdUnqueued(cmd, dir, skipErrorReporting);
 
     return {
       process: procProm.process,

@@ -733,6 +733,27 @@ declare const listPorts: () => Promise<GPhotoListedPort[]>;
 declare const reset: (identifier?: GPhotoIdentifier) => Promise<GPhotoIdentifier>;
 
 /**
+ * Function for handling gphoto2 errors.
+ *
+ * Receives a short error message and the full stderr output.
+ *
+ * Must return a boolean indicating whether the error should be resolved or rejected.
+ *
+ * Can be async.
+ */
+declare type GPhotoErrorHandler = (short: string, long: string) => Promise<boolean> | boolean;
+/**
+ * Set a function for handling gphoto2 errors.
+ *
+ * On error, the provided function receives a short error message and the full stderr output.
+ *
+ * It must return a boolean indicating whether the error should be resolved or rejected.
+ *
+ * It can be async.
+ */
+declare const setErrorHandler: (fn: GPhotoErrorHandler) => void;
+
+/**
  * A collection of functions for managing the configuration of a camera.
  */
 
@@ -749,6 +770,8 @@ type gPhoto_GPhotoConfigInfoObj = GPhotoConfigInfoObj;
 type gPhoto_GPhotoConfigInfo = GPhotoConfigInfo;
 type gPhoto_GPhotoConfigDataType = GPhotoConfigDataType;
 type gPhoto_GPhotoConfigType = GPhotoConfigType;
+type gPhoto_GPhotoErrorHandler = GPhotoErrorHandler;
+declare const gPhoto_setErrorHandler: typeof setErrorHandler;
 type gPhoto_GPhotoAbilities = GPhotoAbilities;
 declare const gPhoto_abilities: typeof abilities;
 declare const gPhoto_autoDetect: typeof autoDetect;
@@ -777,6 +800,8 @@ declare namespace gPhoto {
     gPhoto_GPhotoConfigInfo as GPhotoConfigInfo,
     gPhoto_GPhotoConfigDataType as GPhotoConfigDataType,
     gPhoto_GPhotoConfigType as GPhotoConfigType,
+    gPhoto_GPhotoErrorHandler as GPhotoErrorHandler,
+    gPhoto_setErrorHandler as setErrorHandler,
     gPhoto_GPhotoAbilities as GPhotoAbilities,
     gPhoto_abilities as abilities,
     gPhoto_autoDetect as autoDetect,
@@ -792,4 +817,4 @@ declare namespace gPhoto {
   };
 }
 
-export { GPhotoAbilities, GPhotoCaptureKeep, GPhotoCaptureOptions, GPhotoConfigDataType, GPhotoConfigInfo, GPhotoConfigInfoObj, GPhotoConfigType, GPhotoConfigValueObj, GPhotoIdentifier, GPhotoListedPort, GPhotoLiveview, GPhotoSupportedCamera, SaveLocation, SaveLocationType, abilities, autoDetect, autoDetectWithSerials, autofocus, capture, config, gPhoto as default, getIdentifierForSerial, getSerial, listCameras, listPorts, queuePublic as queue, reset };
+export { GPhotoAbilities, GPhotoCaptureKeep, GPhotoCaptureOptions, GPhotoConfigDataType, GPhotoConfigInfo, GPhotoConfigInfoObj, GPhotoConfigType, GPhotoConfigValueObj, GPhotoErrorHandler, GPhotoIdentifier, GPhotoListedPort, GPhotoLiveview, GPhotoSupportedCamera, SaveLocation, SaveLocationType, abilities, autoDetect, autoDetectWithSerials, autofocus, capture, config, gPhoto as default, getIdentifierForSerial, getSerial, listCameras, listPorts, queuePublic as queue, reset, setErrorHandler };

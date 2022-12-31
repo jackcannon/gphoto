@@ -1,4 +1,4 @@
-import { runCmd, runCmdUnqueued } from '../utils/runCmd';
+import { runCmdUnqueued } from '../utils/runCmd';
 
 /**
  * Information about a supported camera model.

@@ -1,5 +1,5 @@
 import http from 'http';
-import { ProcessPromise, runCmd, runCmdUnqueued, runCmdWithProcess } from '../../utils/runCmd';
+import { ProcessPromise, runCmdUnqueued } from '../../utils/runCmd';
 import { DeferredPromise, getDeferred, seconds, wait } from 'swiss-ak';
 import { GPhotoIdentifier } from '../../gPhoto';
 import { getIdentifierFlags } from '../../utils/identifiers';
@@ -40,7 +40,7 @@ export const liveview = async (cb: (frame: Buffer) => void, autoStart: boolean =
       const url = `http://localhost:${port}/${uniqueId}.jpg`;
       const cmd = `gphoto2 ${getIdentifierFlags(identifier)} --capture-movie --stdout | ffmpeg -re -i pipe:0 -listen 1 -f mjpeg ${url}`;
       try {
-        capture = runCmdUnqueued(cmd);
+        capture = runCmdUnqueued(cmd, undefined, true);
 
         /*
          * Killing the stream command/process will cause the http.get to throw an error.
