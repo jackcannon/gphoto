@@ -8,6 +8,25 @@ import { addToQueueSimple } from '../../utils/queue';
 
 export { GPhotoLiveview };
 
+const isPortOpen = async (port: number): Promise<boolean> => {
+  return new Promise((resolve) => {
+    let server = http.createServer();
+    const handle = (result: boolean) => () => {
+      server.close();
+      resolve(result);
+    };
+    server.once('error', handle(false));
+    server.once('listening', handle(true));
+    server.listen(port);
+  });
+};
+const getRandomPort = (min = 50000, max = 65535) => min + Math.floor(Math.random() * (max - min));
+export const getOpenPort = async (port: number = getRandomPort()): Promise<number> => {
+  const isOpen = await isPortOpen(port);
+  if (isOpen) return port;
+  return getOpenPort(port + 1);
+};
+
 /**
  * Operate a liveview preview stream from the camera.
  *
@@ -36,7 +55,7 @@ export const liveview = async (cb: (frame: Buffer) => void, autoStart: boolean =
 
       const uniqueId = ('0'.repeat(10) + Math.random().toString(36).slice(2)).slice(-10);
 
-      const port = 65535 - 1337 - 420 - 69; // a consistent port that is unlikely to be in use
+      const port = await getOpenPort();
       const url = `http://localhost:${port}/${uniqueId}.jpg`;
       const cmd = `gphoto2 ${getIdentifierFlags(identifier)} --capture-movie --stdout | ffmpeg -re -i pipe:0 -listen 1 -f mjpeg ${url}`;
       try {

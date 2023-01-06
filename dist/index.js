@@ -520,6 +520,25 @@ var getWait = async (options) => {
 // src/commands/capture/liveview.ts
 var import_http = __toESM(require("http"));
 var import_swiss_ak5 = require("swiss-ak");
+var isPortOpen = async (port) => {
+  return new Promise((resolve) => {
+    let server = import_http.default.createServer();
+    const handle = (result) => () => {
+      server.close();
+      resolve(result);
+    };
+    server.once("error", handle(false));
+    server.once("listening", handle(true));
+    server.listen(port);
+  });
+};
+var getRandomPort = (min = 5e4, max = 65535) => min + Math.floor(Math.random() * (max - min));
+var getOpenPort = async (port = getRandomPort()) => {
+  const isOpen = await isPortOpen(port);
+  if (isOpen)
+    return port;
+  return getOpenPort(port + 1);
+};
 var liveview = async (cb, autoStart = false, identifier) => addToQueueSimple(identifier, async () => {
   let capture;
   let response;
@@ -530,7 +549,7 @@ var liveview = async (cb, autoStart = false, identifier) => addToQueueSimple(ide
       await stop();
     }
     const uniqueId = ("0".repeat(10) + Math.random().toString(36).slice(2)).slice(-10);
-    const port = 65535 - 1337 - 420 - 69;
+    const port = await getOpenPort();
     const url = `http://localhost:${port}/${uniqueId}.jpg`;
     const cmd = `gphoto2 ${getIdentifierFlags(identifier)} --capture-movie --stdout | ffmpeg -re -i pipe:0 -listen 1 -f mjpeg ${url}`;
     try {
