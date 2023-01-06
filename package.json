@@ -31,7 +31,7 @@
     "build:dist": "tsup-node src/index.ts --format cjs,esm --dts --clean",
     "build:docs": "typedoc --plugin typedoc-plugin-markdown --entryDocument 'API.md' --readme none --disableSources --hideMembersSymbol --out docs src/index.ts",
     "watch": "yarn build:dist -- --watch src",
-    "example": "sudo ts-node-esm examples/examples.ts",
+    "example": "node --loader ts-node/esm examples/examples.ts",
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
