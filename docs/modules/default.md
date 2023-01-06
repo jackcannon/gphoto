@@ -33,6 +33,7 @@
 - [listPorts](default.md#listports)
 - [queue](default.md#queue)
 - [reset](default.md#reset)
+- [resetAll](default.md#resetall)
 - [setErrorHandler](default.md#seterrorhandler)
 
 ## References
@@ -196,6 +197,12 @@ ___
 ### reset
 
 Re-exports [reset](../API.md#reset)
+
+___
+
+### resetAll
+
+Re-exports [resetAll](../API.md#resetall)
 
 ___
 

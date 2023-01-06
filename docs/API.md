@@ -30,6 +30,7 @@ gphoto
 - [listCameras](API.md#listcameras)
 - [listPorts](API.md#listports)
 - [reset](API.md#reset)
+- [resetAll](API.md#resetall)
 - [setErrorHandler](API.md#seterrorhandler)
 
 ### Interfaces
@@ -305,6 +306,27 @@ await gPhoto.reset(); // camera is disconnected and reconnected
 #### Returns
 
 `Promise`<[`GPhotoIdentifier`](interfaces/GPhotoIdentifier.md)\>
+
+___
+
+### resetAll
+
+**resetAll**(): `Promise`<`void`\>
+
+Resets all the cameras connected to the device.
+
+Resetting the camera will change the port it is connected to, affecting the `port` property of the `GPhotoIdentifier` object.
+No new `GPhotoIdentifier` object is returned, so consider any existing `GPhotoIdentifier` objects invalid.
+
+```ts
+import gPhoto from 'gphoto';
+
+await gPhoto.resetAll(); // all cameras are disconnected and reconnected
+```
+
+#### Returns
+
+`Promise`<`void`\>
 
 ___
 

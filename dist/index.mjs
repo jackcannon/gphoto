@@ -19,6 +19,7 @@ __export(gPhoto_exports, {
   listPorts: () => listPorts,
   queue: () => queue_public_exports,
   reset: () => reset,
+  resetAll: () => resetAll,
   setErrorHandler: () => setErrorHandler
 });
 
@@ -769,6 +770,12 @@ var reset = async (identifier) => {
   await wait2(50);
   return result;
 };
+var resetAll = async () => {
+  const cameras = await autoDetect();
+  for (const camera of cameras) {
+    await reset(camera);
+  }
+};
 
 // src/index.ts
 var src_default = gPhoto_exports;
@@ -786,5 +793,6 @@ export {
   listPorts,
   queue_public_exports as queue,
   reset,
+  resetAll,
   setErrorHandler
 };

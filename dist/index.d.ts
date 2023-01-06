@@ -731,6 +731,19 @@ declare const listPorts: () => Promise<GPhotoListedPort[]>;
  * ```
  */
 declare const reset: (identifier?: GPhotoIdentifier) => Promise<GPhotoIdentifier>;
+/**
+ * Resets all the cameras connected to the device.
+ *
+ * Resetting the camera will change the port it is connected to, affecting the `port` property of the `GPhotoIdentifier` object.
+ * No new `GPhotoIdentifier` object is returned, so consider any existing `GPhotoIdentifier` objects invalid.
+ *
+ * ```ts
+ * import gPhoto from 'gphoto';
+ *
+ * await gPhoto.resetAll(); // all cameras are disconnected and reconnected
+ * ```
+ */
+declare const resetAll: () => Promise<void>;
 
 /**
  * Function for handling gphoto2 errors.
@@ -784,6 +797,7 @@ declare const gPhoto_listCameras: typeof listCameras;
 type gPhoto_GPhotoListedPort = GPhotoListedPort;
 declare const gPhoto_listPorts: typeof listPorts;
 declare const gPhoto_reset: typeof reset;
+declare const gPhoto_resetAll: typeof resetAll;
 declare namespace gPhoto {
   export {
     gPhoto_config as config,
@@ -814,7 +828,8 @@ declare namespace gPhoto {
     gPhoto_GPhotoListedPort as GPhotoListedPort,
     gPhoto_listPorts as listPorts,
     gPhoto_reset as reset,
+    gPhoto_resetAll as resetAll,
   };
 }
 
-export { GPhotoAbilities, GPhotoCaptureKeep, GPhotoCaptureOptions, GPhotoConfigDataType, GPhotoConfigInfo, GPhotoConfigInfoObj, GPhotoConfigType, GPhotoConfigValueObj, GPhotoErrorHandler, GPhotoIdentifier, GPhotoListedPort, GPhotoLiveview, GPhotoSupportedCamera, SaveLocation, SaveLocationType, abilities, autoDetect, autoDetectWithSerials, autofocus, capture, config, gPhoto as default, getIdentifierForSerial, getSerial, listCameras, listPorts, queuePublic as queue, reset, setErrorHandler };
+export { GPhotoAbilities, GPhotoCaptureKeep, GPhotoCaptureOptions, GPhotoConfigDataType, GPhotoConfigInfo, GPhotoConfigInfoObj, GPhotoConfigType, GPhotoConfigValueObj, GPhotoErrorHandler, GPhotoIdentifier, GPhotoListedPort, GPhotoLiveview, GPhotoSupportedCamera, SaveLocation, SaveLocationType, abilities, autoDetect, autoDetectWithSerials, autofocus, capture, config, gPhoto as default, getIdentifierForSerial, getSerial, listCameras, listPorts, queuePublic as queue, reset, resetAll, setErrorHandler };
