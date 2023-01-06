@@ -16,6 +16,8 @@ export class ProcessPromise<T = string> extends Promise<T> {
   }
 }
 
+const ignorableErrors = ['out of focus'];
+
 export const runCmdUnqueued = (cmd: string, dir?: string, skipErrorReporting: boolean = false): ProcessPromise<string> =>
   new ProcessPromise((resolve, reject) =>
     exec(
@@ -26,6 +28,10 @@ export const runCmdUnqueued = (cmd: string, dir?: string, skipErrorReporting: bo
       async (err, stdout, stderr) => {
         if (err) {
           const shortMsg = parseShortErrorMessage(stderr);
+
+          if (ignorableErrors.includes(shortMsg.toLowerCase())) {
+            return resolve('');
+          }
 
           if (!skipErrorReporting && errorHandling.handler) {
             const doResolve = await errorHandling.handler(shortMsg, stderr);

@@ -61,13 +61,7 @@ export const autofocus = async (overrideManual: boolean, identifier?: GPhotoIden
       }
     }
 
-    try {
-      config.setValues({ [autofocusdriveKey]: true }, true, identifier);
-    } catch (e) {
-      // This will sometimes 'error' with a message like "Not in focus".
-      // Yeah, no shit mate, that's why I'm trying to focus it.
-      // So we just catch errors for this and ignore it.
-    }
+    await config.setValues({ [autofocusdriveKey]: true }, true, identifier);
 
     if (overrideManual && original.some((v) => v !== undefined)) {
       const newValues: GPhotoConfigValueObj = Object.fromEntries(zip(keys, original));

@@ -162,6 +162,7 @@ var ProcessPromise = class extends Promise {
     this.process = process2;
   }
 };
+var ignorableErrors = ["out of focus"];
 var runCmdUnqueued = (cmd, dir, skipErrorReporting = false) => new ProcessPromise(
   (resolve, reject) => exec(
     cmd,
@@ -171,6 +172,9 @@ var runCmdUnqueued = (cmd, dir, skipErrorReporting = false) => new ProcessPromis
     async (err, stdout, stderr) => {
       if (err) {
         const shortMsg = parseShortErrorMessage(stderr);
+        if (ignorableErrors.includes(shortMsg.toLowerCase())) {
+          return resolve("");
+        }
         if (!skipErrorReporting && errorHandling.handler) {
           const doResolve = await errorHandling.handler(shortMsg, stderr);
           if (doResolve) {
@@ -708,7 +712,7 @@ var getIdentifierForSerial = async (serial) => {
 };
 
 // src/commands/autofocus.ts
-import { ObjectUtils as ObjectUtils3, tryOr, zip as zip3 } from "swiss-ak";
+import { ObjectUtils as ObjectUtils3, zip as zip3 } from "swiss-ak";
 var findBestAFMode = (info, initial) => {
   return info.choices.find((choice) => choice.toLowerCase().startsWith("af-s")) || info.choices.find((choice) => choice.toLowerCase().startsWith("af")) || info.choices.find((choice) => choice.toLowerCase().startsWith("a")) || initial;
 };
@@ -732,7 +736,7 @@ var autofocus = async (overrideManual, identifier) => pauseLiveviewWrapper(ident
       await setValues(ObjectUtils3.clean(newValues), true, identifier);
     }
   }
-  await tryOr(void 0, () => setValues({ [autofocusdriveKey]: true }, true, identifier));
+  await setValues({ [autofocusdriveKey]: true }, true, identifier);
   if (overrideManual && original.some((v) => v !== void 0)) {
     const newValues = Object.fromEntries(zip3(keys, original));
     await setValues(ObjectUtils3.clean(newValues), true, identifier);

@@ -201,6 +201,7 @@ var ProcessPromise = class extends Promise {
     this.process = process2;
   }
 };
+var ignorableErrors = ["out of focus"];
 var runCmdUnqueued = (cmd, dir, skipErrorReporting = false) => new ProcessPromise(
   (resolve, reject) => (0, import_child_process.exec)(
     cmd,
@@ -210,6 +211,9 @@ var runCmdUnqueued = (cmd, dir, skipErrorReporting = false) => new ProcessPromis
     async (err, stdout, stderr) => {
       if (err) {
         const shortMsg = parseShortErrorMessage(stderr);
+        if (ignorableErrors.includes(shortMsg.toLowerCase())) {
+          return resolve("");
+        }
         if (!skipErrorReporting && errorHandling.handler) {
           const doResolve = await errorHandling.handler(shortMsg, stderr);
           if (doResolve) {
@@ -771,7 +775,7 @@ var autofocus = async (overrideManual, identifier) => pauseLiveviewWrapper(ident
       await setValues(import_swiss_ak9.ObjectUtils.clean(newValues), true, identifier);
     }
   }
-  await (0, import_swiss_ak9.tryOr)(void 0, () => setValues({ [autofocusdriveKey]: true }, true, identifier));
+  await setValues({ [autofocusdriveKey]: true }, true, identifier);
   if (overrideManual && original.some((v) => v !== void 0)) {
     const newValues = Object.fromEntries((0, import_swiss_ak9.zip)(keys, original));
     await setValues(import_swiss_ak9.ObjectUtils.clean(newValues), true, identifier);

@@ -6,6 +6,11 @@ import gPhoto from '../src';
 
 const [exampleName] = process.argv.slice(2);
 
+gPhoto.setErrorHandler((short) => {
+  console.log(chalk.red('ERROR'), short);
+  return true;
+});
+
 const examples = {
   autoDetect: async () => {
     await gPhoto.autoDetect();
