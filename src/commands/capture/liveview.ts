@@ -5,8 +5,11 @@ import { GPhotoIdentifier } from '../../gPhoto';
 import { getIdentifierFlags } from '../../utils/identifiers';
 import { GPhotoLiveview, liveviewStore } from '../../utils/liveviewStore';
 import { addToQueueSimple } from '../../utils/queue';
+import { errorHandling } from '../../utils/errorHandling';
 
 export { GPhotoLiveview };
+
+const ACCEPTABLE_ERRORS = ['connected reset', 'pipe broken'];
 
 const isPortOpen = async (port: number): Promise<boolean> => {
   return new Promise((resolve) => {
@@ -45,6 +48,7 @@ export const liveview = async (cb: (frame: Buffer) => void, autoStart: boolean =
     let capture: ProcessPromise<string>;
     let response: http.IncomingMessage;
     let stopPromise: DeferredPromise<void> = null;
+    let isKilling: boolean = false; // used to know if we're expecting the process to die/error
 
     const isRunning = () => !!(capture || response);
 
@@ -64,6 +68,7 @@ export const liveview = async (cb: (frame: Buffer) => void, autoStart: boolean =
         /*
          * Killing the stream command/process will cause the http.get to throw an error.
          * This is expected and desired behavior, so we catch the error and do nothing.
+         * Other errors (e.g. ffmpeg not installed) should be thrown down the line.
          */
         const handleError = async () => {
           capture.process.on('close', () => {
@@ -74,7 +79,21 @@ export const liveview = async (cb: (frame: Buffer) => void, autoStart: boolean =
           try {
             await capture;
           } catch (err) {
-            // do nothing
+            if (isKilling) {
+              return;
+            }
+            if (ACCEPTABLE_ERRORS.some((e) => err.toLowerCase().includes(e))) {
+              return;
+            }
+
+            if (errorHandling.handler) {
+              const isIgnore = await errorHandling.handler(err, err);
+              if (!isIgnore) {
+                throw new Error(err);
+              }
+            } else {
+              throw new Error(err);
+            }
           }
         };
         handleError();
@@ -113,8 +132,10 @@ export const liveview = async (cb: (frame: Buffer) => void, autoStart: boolean =
 
       if (capture) {
         try {
+          isKilling = true;
           capture.process.disconnect();
           capture.process.kill();
+          isKilling = false;
         } catch (err) {
           // do nothing
         }

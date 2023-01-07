@@ -174,7 +174,7 @@ var errorHandling = {
   handler: null
 };
 var parseShortErrorMessage = (stderr) => {
-  const lines = stderr.split("\n").map((s) => s.trim()).filter((s) => s);
+  const lines = stderr.split(/\n|\r/).map((s) => s.trim()).filter((s) => s);
   const errIndex1 = lines.findIndex((line) => line.startsWith("*** Error ***"));
   if (errIndex1 !== -1) {
     return lines[errIndex1 + 1];
@@ -182,8 +182,23 @@ var parseShortErrorMessage = (stderr) => {
   const errIndex2 = lines.findIndex((line) => line.startsWith("*** Error ("));
   if (errIndex2 !== -1) {
     const line = lines[errIndex2];
-    const match = line.match(/\*\*\* Error \(-5: \'(Unknown port)\'\) \*\*\*/);
+    const match = line.match(/\*\*\* Error \((.*)\) \*\*\*/);
     return (match == null ? void 0 : match[1]) || (match == null ? void 0 : match[0]) || line;
+  }
+  const errIndex3 = lines.findIndex((line) => line.startsWith("*** Error:"));
+  if (errIndex3 !== -1) {
+    const line = lines[errIndex3];
+    const match = line.match(/\*\*\* Error: (.*) \*\*\*/);
+    return (match == null ? void 0 : match[1]) || (match == null ? void 0 : match[0]) || line;
+  }
+  const errIndexConnReset = lines.findIndex((line) => line.toLowerCase().includes("connection reset by peer"));
+  if (errIndexConnReset !== -1) {
+    return "Connection reset by peer";
+  }
+  const errIndexGeneric = lines.findIndex((line) => line.toLowerCase().startsWith("error"));
+  if (errIndexGeneric !== -1) {
+    const line = lines[errIndexGeneric];
+    return line;
   }
   return "";
 };
@@ -219,12 +234,10 @@ var runCmdUnqueued = (cmd, dir, skipErrorReporting = false) => new ProcessPromis
           if (doResolve) {
             return resolve("");
           } else {
-            reject(shortMsg);
+            return reject(shortMsg || stderr);
           }
-        } else {
-          reject(shortMsg);
         }
-        return;
+        return reject(shortMsg || stderr);
       }
       return resolve(stdout);
     }
@@ -526,6 +539,7 @@ var getWait = async (options) => {
 // src/commands/capture/liveview.ts
 var import_http = __toESM(require("http"));
 var import_swiss_ak5 = require("swiss-ak");
+var ACCEPTABLE_ERRORS = ["connected reset", "pipe broken"];
 var isPortOpen = async (port) => {
   return new Promise((resolve) => {
     let server = import_http.default.createServer();
@@ -549,6 +563,7 @@ var liveview = async (cb, autoStart = false, identifier) => addToQueueSimple(ide
   let capture;
   let response;
   let stopPromise = null;
+  let isKilling = false;
   const isRunning = () => !!(capture || response);
   const start = async () => {
     if (isRunning()) {
@@ -569,6 +584,20 @@ var liveview = async (cb, autoStart = false, identifier) => addToQueueSimple(ide
         try {
           await capture;
         } catch (err) {
+          if (isKilling) {
+            return;
+          }
+          if (ACCEPTABLE_ERRORS.some((e) => err.toLowerCase().includes(e))) {
+            return;
+          }
+          if (errorHandling.handler) {
+            const isIgnore = await errorHandling.handler(err, err);
+            if (!isIgnore) {
+              throw new Error(err);
+            }
+          } else {
+            throw new Error(err);
+          }
         }
       };
       handleError();
@@ -602,8 +631,10 @@ var liveview = async (cb, autoStart = false, identifier) => addToQueueSimple(ide
     stopPromise = (0, import_swiss_ak5.getDeferred)();
     if (capture) {
       try {
+        isKilling = true;
         capture.process.disconnect();
         capture.process.kill();
+        isKilling = false;
       } catch (err) {
       }
       capture = void 0;

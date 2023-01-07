@@ -38,13 +38,11 @@ export const runCmdUnqueued = (cmd: string, dir?: string, skipErrorReporting: bo
             if (doResolve) {
               return resolve('');
             } else {
-              reject(shortMsg);
+              return reject(shortMsg || stderr);
             }
-          } else {
-            reject(shortMsg);
           }
 
-          return;
+          return reject(shortMsg || stderr);
         }
 
         return resolve(stdout);
