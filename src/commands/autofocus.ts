@@ -37,7 +37,7 @@ const findBestAFMode = (info: GPhotoConfigInfo, initial: string): string => {
  * ```
  */
 export const autofocus = async (overrideManual: boolean, identifier?: GPhotoIdentifier): Promise<void> =>
-  pauseLiveviewWrapper(identifier, async () => {
+  pauseLiveviewWrapper('autofocus', identifier, async () => {
     const keys = await config.findAppropriateConfigKeys(['focusmode', 'focusmode2'], identifier);
     const [autofocusdriveKey] = await config.findAppropriateConfigKeys(['autofocusdrive'], identifier);
 

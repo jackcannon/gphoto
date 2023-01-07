@@ -7,10 +7,10 @@ let isLiveviewMgmtEnabled = true;
 
 const queueManager = new QueueManager(seconds(0.1));
 
-export const pauseLiveviewWrapper = async <T>(identifier: GPhotoIdentifier, fn: () => Promise<T>): Promise<T> => {
+export const pauseLiveviewWrapper = async <T>(name: string, identifier: GPhotoIdentifier, fn: () => Promise<T>): Promise<T> => {
   if (!isLiveviewMgmtEnabled) return fn();
   const liveview = liveviewStore.get(identifier);
-  const isRunning = liveview && liveview.isRunning();
+  const isRunning = !!(liveview && liveview.isRunning());
 
   if (isRunning) {
     await liveview.stop();
@@ -25,14 +25,14 @@ export const pauseLiveviewWrapper = async <T>(identifier: GPhotoIdentifier, fn: 
   return result;
 };
 
-export const addToQueue = async <T>(identifier: GPhotoIdentifier, fn: () => Promise<T>): Promise<T> => {
-  if (!isLiveviewMgmtEnabled) return addToQueueSimple(identifier, fn);
+export const addToQueue = async <T>(name: string, identifier: GPhotoIdentifier, fn: () => Promise<T>): Promise<T> => {
+  if (!isLiveviewMgmtEnabled) return addToQueueSimple(name, identifier, fn);
   if (!isEnabled) return fn();
-  return await queueManager.add(getID(identifier), () => pauseLiveviewWrapper(identifier, fn));
+  return await queueManager.add(getID(identifier), () => pauseLiveviewWrapper(name, identifier, fn));
 };
 
 // Queue without managing liveview - used by liveview.ts, and by addToQueue if liveview management is disabled
-export const addToQueueSimple = async <T>(identifier: GPhotoIdentifier, fn: () => Promise<T>): Promise<T> => {
+export const addToQueueSimple = async <T>(name: string, identifier: GPhotoIdentifier, fn: () => Promise<T>): Promise<T> => {
   if (!isEnabled) return fn();
 
   return queueManager.add(getID(identifier), fn);

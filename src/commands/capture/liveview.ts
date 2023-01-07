@@ -44,7 +44,7 @@ export const getOpenPort = async (port: number = getRandomPort()): Promise<numbe
  * ```
  */
 export const liveview = async (cb: (frame: Buffer) => void, autoStart: boolean = false, identifier?: GPhotoIdentifier): Promise<GPhotoLiveview> =>
-  addToQueueSimple(identifier, async () => {
+  addToQueueSimple('liveview', identifier, async () => {
     let capture: ProcessPromise<string>;
     let response: http.IncomingMessage;
     let stopPromise: DeferredPromise<void> = null;

@@ -147,14 +147,14 @@ export const parseSingleConfigInfo = (
   return [current, config];
 };
 
-export const filterOutMissingKeys = async (keys: string[], condition: boolean): Promise<string[]> => {
+export const filterOutMissingKeys = async (identifier: GPhotoIdentifier, keys: string[], condition: boolean): Promise<string[]> => {
   if (!condition) return keys;
-  const list = await listFn();
+  const list = await listFn(identifier);
   return keys.filter((key) => list.includes(key));
 };
-export const filterOutMissingProps = async <T extends Object>(obj: T, condition: boolean): Promise<T> => {
+export const filterOutMissingProps = async <T extends Object>(identifier: GPhotoIdentifier, obj: T, condition: boolean): Promise<T> => {
   if (!condition) return obj;
-  const list = await listFn();
+  const list = await listFn(identifier);
   return ObjectUtils.filter(obj, (key) => list.includes(key)) as T;
 };
 

@@ -146,7 +146,7 @@ export const get = async (
   checkIfMissing: boolean = false,
   identifier?: GPhotoIdentifier
 ): Promise<{ info: GPhotoConfigInfoObj; values: GPhotoConfigValueObj }> => {
-  const checked = await filterOutMissingKeys(keys, checkIfMissing);
+  const checked = await filterOutMissingKeys(identifier, keys, checkIfMissing);
   const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
 
   const valuesEntries: [string, GPhotoConfigDataType][] = pairs.map(([value, info]) => [info.key, value]);
@@ -175,7 +175,7 @@ export const get = async (
  * ```
  */
 export const getInfo = async (keys: string[], checkIfMissing: boolean = false, identifier?: GPhotoIdentifier): Promise<GPhotoConfigInfoObj> => {
-  const checked = await filterOutMissingKeys(keys, checkIfMissing);
+  const checked = await filterOutMissingKeys(identifier, keys, checkIfMissing);
   const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
   return Object.fromEntries(pairs.map(([value, info]) => [info.key, info] as [string, GPhotoConfigInfo]));
 };
@@ -205,7 +205,7 @@ export const getValuesAsObj = async (
   checkIfMissing: boolean = false,
   identifier?: GPhotoIdentifier
 ): Promise<GPhotoConfigValueObj> => {
-  const checked = await filterOutMissingKeys(keys, checkIfMissing);
+  const checked = await filterOutMissingKeys(identifier, keys, checkIfMissing);
   const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
   return Object.fromEntries(pairs.map(([value, info]) => [info.key, value] as [string, GPhotoConfigDataType]));
 };
@@ -258,7 +258,7 @@ export const setValues = async (
   checkIfMissing: boolean = false,
   identifier?: GPhotoIdentifier
 ): Promise<void> => {
-  const checked = await filterOutMissingProps(values, checkIfMissing);
+  const checked = await filterOutMissingProps(identifier, values, checkIfMissing);
 
   const keys = Object.keys(checked);
   const cached = getMultipleFromConfigInfoCache(keys, identifier);

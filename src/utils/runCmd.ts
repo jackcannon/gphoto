@@ -51,7 +51,7 @@ export const runCmdUnqueued = (cmd: string, dir?: string, skipErrorReporting: bo
   );
 
 export const runCmd = (cmd: string, identifier: GPhotoIdentifier, dir?: string, skipErrorReporting?: boolean): Promise<string> =>
-  addToQueue(identifier, () => runCmdUnqueued(cmd, dir, skipErrorReporting));
+  addToQueue(cmd, identifier, () => runCmdUnqueued(cmd, dir, skipErrorReporting));
 
 export const runCmdWithProcess = (
   cmd: string,
@@ -62,7 +62,7 @@ export const runCmdWithProcess = (
   process: ChildProcess;
   promise: ProcessPromise<string>;
 }> =>
-  addToQueue(identifier, async () => {
+  addToQueue(cmd, identifier, async () => {
     const procProm = runCmdUnqueued(cmd, dir, skipErrorReporting);
 
     return {

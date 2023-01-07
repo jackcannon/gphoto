@@ -125,11 +125,11 @@ var liveviewStore = new class LiveviewStore {
 var isEnabled = true;
 var isLiveviewMgmtEnabled = true;
 var queueManager = new import_swiss_ak.QueueManager((0, import_swiss_ak.seconds)(0.1));
-var pauseLiveviewWrapper = async (identifier, fn3) => {
+var pauseLiveviewWrapper = async (name, identifier, fn3) => {
   if (!isLiveviewMgmtEnabled)
     return fn3();
   const liveview2 = liveviewStore.get(identifier);
-  const isRunning = liveview2 && liveview2.isRunning();
+  const isRunning = !!(liveview2 && liveview2.isRunning());
   if (isRunning) {
     await liveview2.stop();
   }
@@ -139,14 +139,14 @@ var pauseLiveviewWrapper = async (identifier, fn3) => {
   }
   return result;
 };
-var addToQueue = async (identifier, fn3) => {
+var addToQueue = async (name, identifier, fn3) => {
   if (!isLiveviewMgmtEnabled)
-    return addToQueueSimple(identifier, fn3);
+    return addToQueueSimple(name, identifier, fn3);
   if (!isEnabled)
     return fn3();
-  return await queueManager.add(getID(identifier), () => pauseLiveviewWrapper(identifier, fn3));
+  return await queueManager.add(getID(identifier), () => pauseLiveviewWrapper(name, identifier, fn3));
 };
-var addToQueueSimple = async (identifier, fn3) => {
+var addToQueueSimple = async (name, identifier, fn3) => {
   if (!isEnabled)
     return fn3();
   return queueManager.add(getID(identifier), fn3);
@@ -243,7 +243,7 @@ var runCmdUnqueued = (cmd, dir, skipErrorReporting = false) => new ProcessPromis
     }
   )
 );
-var runCmd = (cmd, identifier, dir, skipErrorReporting) => addToQueue(identifier, () => runCmdUnqueued(cmd, dir, skipErrorReporting));
+var runCmd = (cmd, identifier, dir, skipErrorReporting) => addToQueue(cmd, identifier, () => runCmdUnqueued(cmd, dir, skipErrorReporting));
 
 // src/utils/configCache.ts
 var import_swiss_ak2 = require("swiss-ak");
@@ -354,16 +354,16 @@ var parseSingleConfigInfo = (configInfo, knownKey, identifier) => {
   const current = parseCurrentValueString(currentStr, config.type);
   return [current, config];
 };
-var filterOutMissingKeys = async (keys, condition) => {
+var filterOutMissingKeys = async (identifier, keys, condition) => {
   if (!condition)
     return keys;
-  const list2 = await list();
+  const list2 = await list(identifier);
   return keys.filter((key) => list2.includes(key));
 };
-var filterOutMissingProps = async (obj, condition) => {
+var filterOutMissingProps = async (identifier, obj, condition) => {
   if (!condition)
     return obj;
-  const list2 = await list();
+  const list2 = await list(identifier);
   return import_swiss_ak3.ObjectUtils.filter(obj, (key) => list2.includes(key));
 };
 var getAllConfigInfoAndValues = async (identifier) => {
@@ -420,7 +420,7 @@ var getAllValues = async (identifier) => {
   return Object.fromEntries(valuesEntries);
 };
 var get = async (keys, checkIfMissing = false, identifier) => {
-  const checked = await filterOutMissingKeys(keys, checkIfMissing);
+  const checked = await filterOutMissingKeys(identifier, keys, checkIfMissing);
   const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
   const valuesEntries = pairs.map(([value, info]) => [info.key, value]);
   const infoEntries = pairs.map(([value, info]) => [info.key, info]);
@@ -430,12 +430,12 @@ var get = async (keys, checkIfMissing = false, identifier) => {
   };
 };
 var getInfo = async (keys, checkIfMissing = false, identifier) => {
-  const checked = await filterOutMissingKeys(keys, checkIfMissing);
+  const checked = await filterOutMissingKeys(identifier, keys, checkIfMissing);
   const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
   return Object.fromEntries(pairs.map(([value, info]) => [info.key, info]));
 };
 var getValuesAsObj = async (keys, checkIfMissing = false, identifier) => {
-  const checked = await filterOutMissingKeys(keys, checkIfMissing);
+  const checked = await filterOutMissingKeys(identifier, keys, checkIfMissing);
   const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
   return Object.fromEntries(pairs.map(([value, info]) => [info.key, value]));
 };
@@ -444,7 +444,7 @@ var getValues = async (keys, checkIfMissing = false, identifier) => {
   return keys.map((key) => valuesObj[key]);
 };
 var setValues = async (values, checkIfMissing = false, identifier) => {
-  const checked = await filterOutMissingProps(values, checkIfMissing);
+  const checked = await filterOutMissingProps(identifier, values, checkIfMissing);
   const keys = Object.keys(checked);
   const cached = getMultipleFromConfigInfoCache(keys, identifier);
   const allInfos = Object.values(cached);
@@ -559,7 +559,7 @@ var getOpenPort = async (port = getRandomPort()) => {
     return port;
   return getOpenPort(port + 1);
 };
-var liveview = async (cb, autoStart = false, identifier) => addToQueueSimple(identifier, async () => {
+var liveview = async (cb, autoStart = false, identifier) => addToQueueSimple("liveview", identifier, async () => {
   let capture;
   let response;
   let stopPromise = null;
@@ -786,7 +786,7 @@ var import_swiss_ak9 = require("swiss-ak");
 var findBestAFMode = (info, initial) => {
   return info.choices.find((choice) => choice.toLowerCase().startsWith("af-s")) || info.choices.find((choice) => choice.toLowerCase().startsWith("af")) || info.choices.find((choice) => choice.toLowerCase().startsWith("a")) || initial;
 };
-var autofocus = async (overrideManual, identifier) => pauseLiveviewWrapper(identifier, async () => {
+var autofocus = async (overrideManual, identifier) => pauseLiveviewWrapper("autofocus", identifier, async () => {
   const keys = await findAppropriateConfigKeys(["focusmode", "focusmode2"], identifier);
   const [autofocusdriveKey] = await findAppropriateConfigKeys(["autofocusdrive"], identifier);
   let original = keys.map(() => void 0);
