@@ -767,6 +767,12 @@ declare type GPhotoErrorHandler = (short: string, long: string) => Promise<boole
 declare const setErrorHandler: (fn: GPhotoErrorHandler) => void;
 
 /**
+ * Turn on debugging mode, so that commands are printed as they are run.
+ * Useful for debugging.
+ */
+declare const setDebugging: (debug: boolean) => void;
+
+/**
  * A collection of functions for managing the configuration of a camera.
  */
 
@@ -785,6 +791,7 @@ type gPhoto_GPhotoConfigDataType = GPhotoConfigDataType;
 type gPhoto_GPhotoConfigType = GPhotoConfigType;
 type gPhoto_GPhotoErrorHandler = GPhotoErrorHandler;
 declare const gPhoto_setErrorHandler: typeof setErrorHandler;
+declare const gPhoto_setDebugging: typeof setDebugging;
 type gPhoto_GPhotoAbilities = GPhotoAbilities;
 declare const gPhoto_abilities: typeof abilities;
 declare const gPhoto_autoDetect: typeof autoDetect;
@@ -816,6 +823,7 @@ declare namespace gPhoto {
     gPhoto_GPhotoConfigType as GPhotoConfigType,
     gPhoto_GPhotoErrorHandler as GPhotoErrorHandler,
     gPhoto_setErrorHandler as setErrorHandler,
+    gPhoto_setDebugging as setDebugging,
     gPhoto_GPhotoAbilities as GPhotoAbilities,
     gPhoto_abilities as abilities,
     gPhoto_autoDetect as autoDetect,
@@ -832,4 +840,4 @@ declare namespace gPhoto {
   };
 }
 
-export { GPhotoAbilities, GPhotoCaptureKeep, GPhotoCaptureOptions, GPhotoConfigDataType, GPhotoConfigInfo, GPhotoConfigInfoObj, GPhotoConfigType, GPhotoConfigValueObj, GPhotoErrorHandler, GPhotoIdentifier, GPhotoListedPort, GPhotoLiveview, GPhotoSupportedCamera, SaveLocation, SaveLocationType, abilities, autoDetect, autoDetectWithSerials, autofocus, capture, config, gPhoto as default, getIdentifierForSerial, getSerial, listCameras, listPorts, queuePublic as queue, reset, resetAll, setErrorHandler };
+export { GPhotoAbilities, GPhotoCaptureKeep, GPhotoCaptureOptions, GPhotoConfigDataType, GPhotoConfigInfo, GPhotoConfigInfoObj, GPhotoConfigType, GPhotoConfigValueObj, GPhotoErrorHandler, GPhotoIdentifier, GPhotoListedPort, GPhotoLiveview, GPhotoSupportedCamera, SaveLocation, SaveLocationType, abilities, autoDetect, autoDetectWithSerials, autofocus, capture, config, gPhoto as default, getIdentifierForSerial, getSerial, listCameras, listPorts, queuePublic as queue, reset, resetAll, setDebugging, setErrorHandler };

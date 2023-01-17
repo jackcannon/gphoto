@@ -20,6 +20,7 @@ __export(gPhoto_exports, {
   queue: () => queue_public_exports,
   reset: () => reset,
   resetAll: () => resetAll,
+  setDebugging: () => setDebugging,
   setErrorHandler: () => setErrorHandler
 });
 
@@ -167,6 +168,20 @@ var setErrorHandler = (fn3) => {
   errorHandling.handler = fn3;
 };
 
+// src/utils/debugging.ts
+var debugging = {
+  isOn: false
+};
+var setDebugging = (debug) => {
+  debugging.isOn = debug;
+};
+var log = (message) => {
+  if (!debugging.isOn)
+    return;
+  const date = new Date().toISOString().substring(11, 23);
+  console.log(`\x1B[2m[${date}]\x1B[22m \x1B[100m\x1B[30m gPho \x1B[39m\x1B[49m \x1B[2m${message}\x1B[22m`);
+};
+
 // src/utils/runCmd.ts
 var ProcessPromise = class extends Promise {
   constructor(executor) {
@@ -178,8 +193,9 @@ var ProcessPromise = class extends Promise {
   }
 };
 var ignorableErrors = ["out of focus"];
-var runCmdUnqueued = (cmd, dir, skipErrorReporting = false) => new ProcessPromise(
-  (resolve, reject) => exec(
+var runCmdUnqueued = (cmd, dir, skipErrorReporting = false) => new ProcessPromise((resolve, reject) => {
+  log(`cmd: ${cmd}`);
+  return exec(
     cmd,
     {
       cwd: dir || process.cwd()
@@ -202,8 +218,8 @@ var runCmdUnqueued = (cmd, dir, skipErrorReporting = false) => new ProcessPromis
       }
       return resolve(stdout);
     }
-  )
-);
+  );
+});
 var runCmd = (cmd, identifier, dir, skipErrorReporting) => addToQueue(cmd, identifier, () => runCmdUnqueued(cmd, dir, skipErrorReporting));
 
 // src/utils/configCache.ts
@@ -829,5 +845,6 @@ export {
   queue_public_exports as queue,
   reset,
   resetAll,
+  setDebugging,
   setErrorHandler
 };

@@ -34,6 +34,7 @@
 - [queue](default.md#queue)
 - [reset](default.md#reset)
 - [resetAll](default.md#resetall)
+- [setDebugging](default.md#setdebugging)
 - [setErrorHandler](default.md#seterrorhandler)
 
 ## References
@@ -203,6 +204,12 @@ ___
 ### resetAll
 
 Re-exports [resetAll](../API.md#resetall)
+
+___
+
+### setDebugging
+
+Re-exports [setDebugging](../API.md#setdebugging)
 
 ___
 

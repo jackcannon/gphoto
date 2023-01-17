@@ -63,12 +63,15 @@ const examples = {
     await gPhoto.config.get(['/main/imgsettings/iso', '/main/capturesettings/shutterspeed2']);
   },
   'take-photo': async () => {
-    await gPhoto.capture.image({
-      directory,
-      keep: 'raw',
-      wait: getWaitUntilTime(),
-      filename: 'image-%n.%C'
-    });
+    console.log(
+      await gPhoto.capture.image({
+        directory,
+        download: true,
+        keep: true,
+        wait: getWaitUntilTime(),
+        filename: 'image-%n.%C'
+      })
+    );
   },
   preview: async () => {
     await gPhoto.capture.preview({

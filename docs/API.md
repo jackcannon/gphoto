@@ -31,6 +31,7 @@ gphoto
 - [listPorts](API.md#listports)
 - [reset](API.md#reset)
 - [resetAll](API.md#resetall)
+- [setDebugging](API.md#setdebugging)
 - [setErrorHandler](API.md#seterrorhandler)
 
 ### Interfaces
@@ -327,6 +328,25 @@ await gPhoto.resetAll(); // all cameras are disconnected and reconnected
 #### Returns
 
 `Promise`<`void`\>
+
+___
+
+### setDebugging
+
+**setDebugging**(`debug`): `void`
+
+Turn on debugging mode, so that commands are printed as they are run.
+Useful for debugging.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `debug` | `boolean` |
+
+#### Returns
+
+`void`
 
 ___
 
