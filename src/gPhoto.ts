@@ -26,4 +26,4 @@ export { SaveLocation, SaveLocationType } from './utils/captureUtils';
 export { GPhotoIdentifier } from './utils/identifiers';
 export { GPhotoConfigValueObj, GPhotoConfigInfoObj, GPhotoConfigInfo, GPhotoConfigDataType, GPhotoConfigType } from './utils/configUtils';
 export { GPhotoErrorHandler, setErrorHandler } from './utils/errorHandling';
-export { setDebugging } from './utils/debugging';
+export { GPhotoLogLevel, setLogLevel, setCustomLogHandler } from './utils/logging';

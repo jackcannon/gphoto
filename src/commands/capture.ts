@@ -1,5 +1,6 @@
 import { SaveLocation, SaveLocationType, parseCaptureStdout } from '../utils/captureUtils';
 import { GPhotoIdentifier, getIdentifierFlags } from '../utils/identifiers';
+import { checkForWarnings } from '../utils/logging';
 import { runCmd } from '../utils/runCmd';
 import { GPhotoCaptureKeep, GPhotoCaptureOptions, getFlags, getWait } from './capture/options';
 
@@ -39,6 +40,7 @@ export { GPhotoCaptureKeep, GPhotoCaptureOptions, SaveLocation, SaveLocationType
  * ```
  */
 export const image = async (options: GPhotoCaptureOptions = {}, identifier?: GPhotoIdentifier): Promise<SaveLocation[]> => {
+  checkForWarnings('capture.image', identifier);
   const mainFlag = options.download !== false ? '--capture-image-and-download' : '--capture-image';
   const flags = getFlags(options);
   const cmd = `gphoto2 ${getIdentifierFlags(identifier)} ${mainFlag} ${flags} --force-overwrite`;
@@ -73,6 +75,7 @@ export const image = async (options: GPhotoCaptureOptions = {}, identifier?: GPh
  * ```
  */
 export const preview = async (options: GPhotoCaptureOptions = {}, identifier?: GPhotoIdentifier): Promise<SaveLocation[]> => {
+  checkForWarnings('capture.preview', identifier);
   let opts = options;
   if (options.filename) {
     // Preview images don't support the %C variable, so we replace it with jpg

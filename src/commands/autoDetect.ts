@@ -3,6 +3,7 @@ import { readTable } from '../utils/readTable';
 import { GPhotoIdentifier } from '../utils/identifiers';
 import * as config from './config';
 import { PromiseUtils } from 'swiss-ak';
+import { setAutoDetectInCache } from '../utils/cache';
 
 /**
  * Returns a list of connected cameras
@@ -20,6 +21,8 @@ export const autoDetect = async (): Promise<GPhotoIdentifier[]> => {
   const out = await runCmdUnqueued('gphoto2 --auto-detect');
 
   const cameras = readTable<GPhotoIdentifier>(out, ['model', 'port']);
+
+  setAutoDetectInCache(cameras);
 
   return cameras;
 };

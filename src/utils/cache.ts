@@ -4,7 +4,8 @@ import { GPhotoIdentifier } from '../../dist';
 
 const caches = {
   configInfo: new Map<string, Map<string, GPhotoConfigInfo>>(),
-  list: new Map<string, string[]>()
+  list: new Map<string, string[]>(),
+  autoDetect: [] as GPhotoIdentifier[]
 };
 
 // GENERAL
@@ -18,20 +19,11 @@ const getInfoStore = (id: string) => {
 };
 
 // CONFIGINFO
+// Used for double-checking when setting config values
 export const addToConfigInfoCache = (info: GPhotoConfigInfo, identifer: GPhotoIdentifier) => {
   const id = parseID(identifer);
   const store = getInfoStore(id);
   store.set(info.key, info);
-};
-export const addMultipleToConfigInfoCache = (infos: GPhotoConfigInfo[], identifer: GPhotoIdentifier) => {
-  const id = parseID(identifer);
-  const store = getInfoStore(id);
-  infos.forEach((info) => store.set(info.key, info));
-};
-export const getFromConfigInfoCache = (key: string, identifer: GPhotoIdentifier): GPhotoConfigInfo => {
-  const id = parseID(identifer);
-  const store = getInfoStore(id);
-  return store.get(key);
 };
 export const getMultipleFromConfigInfoCache = (keys: string[], identifer: GPhotoIdentifier): { [key: string]: GPhotoConfigInfo } => {
   const id = parseID(identifer);
@@ -47,6 +39,7 @@ export const getMultipleFromConfigInfoCache = (keys: string[], identifer: GPhoto
 };
 
 // LIST OF KEYS
+// Will never change, so if we have a list for a given camera, we can just use a cached version
 export const getConfigKeyListFromCache = (identifer: GPhotoIdentifier): string[] => {
   const id = parseID(identifer);
   return caches.list.get(id);
@@ -54,4 +47,11 @@ export const getConfigKeyListFromCache = (identifer: GPhotoIdentifier): string[]
 export const setConfigKeyListInCache = (list: string[], identifer: GPhotoIdentifier) => {
   const id = parseID(identifer);
   caches.list.set(id, list);
+};
+
+// AUTODETECT
+// Cache the autodetect results so we can warn the user if they try to call without an identifier if there's multiple cameras
+export const getAutoDetectFromCache = (): GPhotoIdentifier[] => caches.autoDetect;
+export const setAutoDetectInCache = (list: GPhotoIdentifier[]) => {
+  caches.autoDetect = JSON.parse(JSON.stringify(list));
 };

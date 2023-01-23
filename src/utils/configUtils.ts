@@ -1,4 +1,4 @@
-import { addToConfigInfoCache } from './configCache';
+import { addToConfigInfoCache } from './cache';
 import { GPhotoIdentifier, getIdentifierFlags } from './identifiers';
 import { runCmd } from './runCmd';
 import { wrapQuotes } from './wrapQuotes';

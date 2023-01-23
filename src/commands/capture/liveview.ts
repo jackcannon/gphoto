@@ -6,6 +6,7 @@ import { getIdentifierFlags } from '../../utils/identifiers';
 import { GPhotoLiveview, liveviewStore } from '../../utils/liveviewStore';
 import { addToQueueSimple } from '../../utils/queue';
 import { errorHandling } from '../../utils/errorHandling';
+import { checkForWarnings } from '../../utils/logging';
 
 export { GPhotoLiveview };
 
@@ -45,6 +46,7 @@ export const getOpenPort = async (port: number = getRandomPort()): Promise<numbe
  */
 export const liveview = async (cb: (frame: Buffer) => void, autoStart: boolean = false, identifier?: GPhotoIdentifier): Promise<GPhotoLiveview> =>
   addToQueueSimple('liveview', identifier, async () => {
+    checkForWarnings('liveview', identifier);
     let capture: ProcessPromise<string>;
     let response: http.IncomingMessage;
     let stopPromise: DeferredPromise<void> = null;

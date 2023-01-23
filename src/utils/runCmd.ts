@@ -2,7 +2,7 @@ import { ChildProcess, exec } from 'child_process';
 import { GPhotoIdentifier } from './identifiers';
 import { addToQueue } from './queue';
 import { errorHandling, parseShortErrorMessage } from './errorHandling';
-import { log } from './debugging';
+import { log } from './logging';
 
 export class ProcessPromise<T = string> extends Promise<T> {
   process: ChildProcess;
@@ -21,7 +21,7 @@ const ignorableErrors = ['out of focus'];
 
 export const runCmdUnqueued = (cmd: string, dir?: string, skipErrorReporting: boolean = false): ProcessPromise<string> =>
   new ProcessPromise((resolve, reject) => {
-    log(`cmd: ${cmd}`);
+    log('debug', `cmd: ${cmd}`);
     return exec(
       cmd,
       {

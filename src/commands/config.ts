@@ -12,7 +12,8 @@ import {
   getAllConfigInfoAndValues,
   getMultipleConfigInfoAndValues
 } from '../utils/configUtils';
-import { getConfigKeyListFromCache, getMultipleFromConfigInfoCache, setConfigKeyListInCache } from '../utils/configCache';
+import { getConfigKeyListFromCache, getMultipleFromConfigInfoCache, setConfigKeyListInCache } from '../utils/cache';
+import { checkForWarnings } from '../utils/logging';
 
 /**
  * Get a list of all the configuration option keys available on the camera.
@@ -26,6 +27,7 @@ import { getConfigKeyListFromCache, getMultipleFromConfigInfoCache, setConfigKey
  * ```
  */
 export const list = async (identifier?: GPhotoIdentifier): Promise<string[]> => {
+  checkForWarnings('config.list', identifier);
   const cached = getConfigKeyListFromCache(identifier);
   if (cached) return cached;
 
@@ -51,6 +53,7 @@ export const list = async (identifier?: GPhotoIdentifier): Promise<string[]> => 
  * ```
  */
 export const findAppropriateConfigKeys = async (keys: string[], identifier?: GPhotoIdentifier): Promise<string[]> => {
+  checkForWarnings('config.findAppropriateConfigKeys', identifier);
   const allKeys = await list(identifier);
 
   return keys.map((key) => {
@@ -79,6 +82,7 @@ export const findAppropriateConfigKeys = async (keys: string[], identifier?: GPh
  * ```
  */
 export const getAll = async (identifier?: GPhotoIdentifier): Promise<{ info: GPhotoConfigInfoObj; values: GPhotoConfigValueObj }> => {
+  checkForWarnings('config.getAll', identifier);
   const pairs = await getAllConfigInfoAndValues(identifier);
 
   const valuesEntries: [string, GPhotoConfigDataType][] = pairs.map(([value, info]) => [info.key, value]);
@@ -102,6 +106,7 @@ export const getAll = async (identifier?: GPhotoIdentifier): Promise<{ info: GPh
  * ```
  */
 export const getAllInfo = async (identifier?: GPhotoIdentifier): Promise<GPhotoConfigInfoObj> => {
+  checkForWarnings('config.getAllInfo', identifier);
   const pairs = await getAllConfigInfoAndValues(identifier);
   const infoEntries: [string, GPhotoConfigInfo][] = pairs.map(([value, info]) => [info.key, info]);
   return Object.fromEntries(infoEntries);
@@ -119,6 +124,7 @@ export const getAllInfo = async (identifier?: GPhotoIdentifier): Promise<GPhotoC
  * ```
  */
 export const getAllValues = async (identifier?: GPhotoIdentifier): Promise<GPhotoConfigValueObj> => {
+  checkForWarnings('config.getAllValues', identifier);
   const pairs = await getAllConfigInfoAndValues(identifier);
   const valuesEntries: [string, GPhotoConfigDataType][] = pairs.map(([value, info]) => [info.key, value]);
   return Object.fromEntries(valuesEntries);
@@ -146,6 +152,7 @@ export const get = async (
   checkIfMissing: boolean = false,
   identifier?: GPhotoIdentifier
 ): Promise<{ info: GPhotoConfigInfoObj; values: GPhotoConfigValueObj }> => {
+  checkForWarnings('config.get', identifier);
   const checked = await filterOutMissingKeys(identifier, keys, checkIfMissing);
   const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
 
@@ -175,6 +182,7 @@ export const get = async (
  * ```
  */
 export const getInfo = async (keys: string[], checkIfMissing: boolean = false, identifier?: GPhotoIdentifier): Promise<GPhotoConfigInfoObj> => {
+  checkForWarnings('config.getInfo', identifier);
   const checked = await filterOutMissingKeys(identifier, keys, checkIfMissing);
   const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
   return Object.fromEntries(pairs.map(([value, info]) => [info.key, info] as [string, GPhotoConfigInfo]));
@@ -205,6 +213,7 @@ export const getValuesAsObj = async (
   checkIfMissing: boolean = false,
   identifier?: GPhotoIdentifier
 ): Promise<GPhotoConfigValueObj> => {
+  checkForWarnings('config.getValuesAsObj', identifier);
   const checked = await filterOutMissingKeys(identifier, keys, checkIfMissing);
   const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
   return Object.fromEntries(pairs.map(([value, info]) => [info.key, value] as [string, GPhotoConfigDataType]));
@@ -231,6 +240,7 @@ export const getValuesAsObj = async (
  * ```
  */
 export const getValues = async (keys: string[], checkIfMissing: boolean = false, identifier?: GPhotoIdentifier): Promise<GPhotoConfigDataType[]> => {
+  checkForWarnings('config.getValues', identifier);
   const valuesObj = await getValuesAsObj(keys, checkIfMissing, identifier);
   return keys.map((key) => valuesObj[key]);
 };
@@ -258,6 +268,7 @@ export const setValues = async (
   checkIfMissing: boolean = false,
   identifier?: GPhotoIdentifier
 ): Promise<void> => {
+  checkForWarnings('config.setValues', identifier);
   const checked = await filterOutMissingProps(identifier, values, checkIfMissing);
 
   const keys = Object.keys(checked);

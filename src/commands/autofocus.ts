@@ -3,6 +3,7 @@ import { GPhotoConfigInfo, GPhotoConfigValueObj } from '../gPhoto';
 import { GPhotoIdentifier } from '../utils/identifiers';
 import * as config from './config';
 import { pauseLiveviewWrapper } from '../utils/queue';
+import { checkForWarnings } from '../utils/logging';
 
 const findBestAFMode = (info: GPhotoConfigInfo, initial: string): string => {
   return (
@@ -38,6 +39,7 @@ const findBestAFMode = (info: GPhotoConfigInfo, initial: string): string => {
  */
 export const autofocus = async (overrideManual: boolean, identifier?: GPhotoIdentifier): Promise<void> =>
   pauseLiveviewWrapper('autofocus', identifier, async () => {
+    checkForWarnings('autofocus', identifier);
     const keys = await config.findAppropriateConfigKeys(['focusmode', 'focusmode2'], identifier);
     const [autofocusdriveKey] = await config.findAppropriateConfigKeys(['autofocusdrive'], identifier);
 

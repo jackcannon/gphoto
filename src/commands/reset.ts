@@ -2,6 +2,7 @@ import { wait } from 'swiss-ak';
 import { runCmd } from '../utils/runCmd';
 import { GPhotoIdentifier, getIdentifierFlags } from '../utils/identifiers';
 import { autoDetect, getIdentifierForSerial, getSerial } from './autoDetect';
+import { checkForWarnings } from '../utils/logging';
 
 /**
  * Resets the USB port of the camera.
@@ -21,6 +22,7 @@ import { autoDetect, getIdentifierForSerial, getSerial } from './autoDetect';
  * ```
  */
 export const reset = async (identifier?: GPhotoIdentifier): Promise<GPhotoIdentifier> => {
+  checkForWarnings('reset', identifier);
   const serial = await getSerial(identifier);
   await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --reset`, identifier);
   const result = await getIdentifierForSerial(serial);

@@ -18,6 +18,7 @@
 - [GPhotoIdentifier](default.md#gphotoidentifier)
 - [GPhotoListedPort](default.md#gphotolistedport)
 - [GPhotoLiveview](default.md#gphotoliveview)
+- [GPhotoLogLevel](default.md#gphotologlevel)
 - [GPhotoSupportedCamera](default.md#gphotosupportedcamera)
 - [SaveLocation](default.md#savelocation)
 - [SaveLocationType](default.md#savelocationtype)
@@ -34,8 +35,9 @@
 - [queue](default.md#queue)
 - [reset](default.md#reset)
 - [resetAll](default.md#resetall)
-- [setDebugging](default.md#setdebugging)
+- [setCustomLogHandler](default.md#setcustomloghandler)
 - [setErrorHandler](default.md#seterrorhandler)
+- [setLogLevel](default.md#setloglevel)
 
 ## References
 
@@ -108,6 +110,12 @@ ___
 ### GPhotoLiveview
 
 Re-exports [GPhotoLiveview](../interfaces/capture.GPhotoLiveview.md)
+
+___
+
+### GPhotoLogLevel
+
+Re-exports [GPhotoLogLevel](../API.md#gphotologlevel)
 
 ___
 
@@ -207,12 +215,18 @@ Re-exports [resetAll](../API.md#resetall)
 
 ___
 
-### setDebugging
+### setCustomLogHandler
 
-Re-exports [setDebugging](../API.md#setdebugging)
+Re-exports [setCustomLogHandler](../API.md#setcustomloghandler)
 
 ___
 
 ### setErrorHandler
 
 Re-exports [setErrorHandler](../API.md#seterrorhandler)
+
+___
+
+### setLogLevel
+
+Re-exports [setLogLevel](../API.md#setloglevel)

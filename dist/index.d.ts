@@ -767,10 +767,36 @@ declare type GPhotoErrorHandler = (short: string, long: string) => Promise<boole
 declare const setErrorHandler: (fn: GPhotoErrorHandler) => void;
 
 /**
- * Turn on debugging mode, so that commands are printed as they are run.
- * Useful for debugging.
+ * An indication of what level of logging to use.
+ *
+ * Supported levels:
+ * - none: No logging
+ * - error: Only errors
+ * - warning: Errors and warnings (default)
+ * - info: Errors, warnings and info
+ * - log: Errors, warnings, info and log
+ * - debug: Errors, warnings, info, log and debug
  */
-declare const setDebugging: (debug: boolean) => void;
+declare type GPhotoLogLevel = 'none' | 'error' | 'warning' | 'info' | 'log' | 'debug';
+/**
+ * Set the level of logging to use.
+ *
+ * Supported levels:
+ * - none: No logging
+ * - error: Only errors
+ * - warning: Errors and warnings (default)
+ * - info: Errors, warnings and info
+ * - log: Errors, warnings, info and log
+ * - debug: Errors, warnings, info, log and debug
+ */
+declare const setLogLevel: (logLevel: GPhotoLogLevel) => void;
+/**
+ * Set a custom function to handle logging.
+ *
+ * If set, this function will be called instead of the default logging.
+ * This will still abide by the log level set.
+ */
+declare const setCustomLogHandler: (customFn: (type: GPhotoLogLevel, ...logArgs: any[]) => void) => void;
 
 /**
  * A collection of functions for managing the configuration of a camera.
@@ -791,7 +817,9 @@ type gPhoto_GPhotoConfigDataType = GPhotoConfigDataType;
 type gPhoto_GPhotoConfigType = GPhotoConfigType;
 type gPhoto_GPhotoErrorHandler = GPhotoErrorHandler;
 declare const gPhoto_setErrorHandler: typeof setErrorHandler;
-declare const gPhoto_setDebugging: typeof setDebugging;
+type gPhoto_GPhotoLogLevel = GPhotoLogLevel;
+declare const gPhoto_setLogLevel: typeof setLogLevel;
+declare const gPhoto_setCustomLogHandler: typeof setCustomLogHandler;
 type gPhoto_GPhotoAbilities = GPhotoAbilities;
 declare const gPhoto_abilities: typeof abilities;
 declare const gPhoto_autoDetect: typeof autoDetect;
@@ -823,7 +851,9 @@ declare namespace gPhoto {
     gPhoto_GPhotoConfigType as GPhotoConfigType,
     gPhoto_GPhotoErrorHandler as GPhotoErrorHandler,
     gPhoto_setErrorHandler as setErrorHandler,
-    gPhoto_setDebugging as setDebugging,
+    gPhoto_GPhotoLogLevel as GPhotoLogLevel,
+    gPhoto_setLogLevel as setLogLevel,
+    gPhoto_setCustomLogHandler as setCustomLogHandler,
     gPhoto_GPhotoAbilities as GPhotoAbilities,
     gPhoto_abilities as abilities,
     gPhoto_autoDetect as autoDetect,
@@ -840,4 +870,4 @@ declare namespace gPhoto {
   };
 }
 
-export { GPhotoAbilities, GPhotoCaptureKeep, GPhotoCaptureOptions, GPhotoConfigDataType, GPhotoConfigInfo, GPhotoConfigInfoObj, GPhotoConfigType, GPhotoConfigValueObj, GPhotoErrorHandler, GPhotoIdentifier, GPhotoListedPort, GPhotoLiveview, GPhotoSupportedCamera, SaveLocation, SaveLocationType, abilities, autoDetect, autoDetectWithSerials, autofocus, capture, config, gPhoto as default, getIdentifierForSerial, getSerial, listCameras, listPorts, queuePublic as queue, reset, resetAll, setDebugging, setErrorHandler };
+export { GPhotoAbilities, GPhotoCaptureKeep, GPhotoCaptureOptions, GPhotoConfigDataType, GPhotoConfigInfo, GPhotoConfigInfoObj, GPhotoConfigType, GPhotoConfigValueObj, GPhotoErrorHandler, GPhotoIdentifier, GPhotoListedPort, GPhotoLiveview, GPhotoLogLevel, GPhotoSupportedCamera, SaveLocation, SaveLocationType, abilities, autoDetect, autoDetectWithSerials, autofocus, capture, config, gPhoto as default, getIdentifierForSerial, getSerial, listCameras, listPorts, queuePublic as queue, reset, resetAll, setCustomLogHandler, setErrorHandler, setLogLevel };

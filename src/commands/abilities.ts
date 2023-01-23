@@ -1,6 +1,7 @@
 import { fn } from 'swiss-ak';
 import { GPhotoIdentifier, getIdentifierFlags } from '../utils/identifiers';
 import { runCmd } from '../utils/runCmd';
+import { checkForWarnings } from '../utils/logging';
 
 /**
  * The abilities of a camera. Returned by gPhoto.abilities()
@@ -85,6 +86,7 @@ const parseAbilitiesTable = (out: string): GPhotoAbilities => {
  * ```
  */
 export const abilities = async (identifier?: GPhotoIdentifier): Promise<GPhotoAbilities> => {
+  checkForWarnings('abilities', identifier);
   const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --abilities `, identifier);
   return parseAbilitiesTable(out);
 };

@@ -20,8 +20,9 @@ __export(gPhoto_exports, {
   queue: () => queue_public_exports,
   reset: () => reset,
   resetAll: () => resetAll,
-  setDebugging: () => setDebugging,
-  setErrorHandler: () => setErrorHandler
+  setCustomLogHandler: () => setCustomLogHandler,
+  setErrorHandler: () => setErrorHandler,
+  setLogLevel: () => setLogLevel
 });
 
 // src/commands/config.ts
@@ -168,65 +169,12 @@ var setErrorHandler = (fn3) => {
   errorHandling.handler = fn3;
 };
 
-// src/utils/debugging.ts
-var debugging = {
-  isOn: false
-};
-var setDebugging = (debug) => {
-  debugging.isOn = debug;
-};
-var log = (message) => {
-  if (!debugging.isOn)
-    return;
-  const date = new Date().toISOString().substring(11, 23);
-  console.log(`\x1B[2m[${date}]\x1B[22m \x1B[100m\x1B[30m gPho \x1B[39m\x1B[49m \x1B[2m${message}\x1B[22m`);
-};
-
-// src/utils/runCmd.ts
-var ProcessPromise = class extends Promise {
-  constructor(executor) {
-    let process2;
-    super((resolve, reject) => {
-      process2 = executor(resolve, reject);
-    });
-    this.process = process2;
-  }
-};
-var ignorableErrors = ["out of focus"];
-var runCmdUnqueued = (cmd, dir, skipErrorReporting = false) => new ProcessPromise((resolve, reject) => {
-  log(`cmd: ${cmd}`);
-  return exec(
-    cmd,
-    {
-      cwd: dir || process.cwd()
-    },
-    async (err, stdout, stderr) => {
-      if (err) {
-        const shortMsg = parseShortErrorMessage(stderr);
-        if (ignorableErrors.includes(shortMsg.toLowerCase())) {
-          return resolve("");
-        }
-        if (!skipErrorReporting && errorHandling.handler) {
-          const doResolve = await errorHandling.handler(shortMsg, stderr);
-          if (doResolve) {
-            return resolve("");
-          } else {
-            return reject(shortMsg || stderr);
-          }
-        }
-        return reject(shortMsg || stderr);
-      }
-      return resolve(stdout);
-    }
-  );
-});
-var runCmd = (cmd, identifier, dir, skipErrorReporting) => addToQueue(cmd, identifier, () => runCmdUnqueued(cmd, dir, skipErrorReporting));
-
-// src/utils/configCache.ts
+// src/utils/cache.ts
 import { ObjectUtils, zip } from "swiss-ak";
 var caches = {
   configInfo: /* @__PURE__ */ new Map(),
-  list: /* @__PURE__ */ new Map()
+  list: /* @__PURE__ */ new Map(),
+  autoDetect: []
 };
 var parseID = (identifer = {}) => identifer.port || identifer.model || "auto";
 var getInfoStore = (id) => {
@@ -261,6 +209,87 @@ var setConfigKeyListInCache = (list2, identifer) => {
   const id = parseID(identifer);
   caches.list.set(id, list2);
 };
+var getAutoDetectFromCache = () => caches.autoDetect;
+var setAutoDetectInCache = (list2) => {
+  caches.autoDetect = JSON.parse(JSON.stringify(list2));
+};
+
+// src/utils/logging.ts
+var logLevelOrder = ["none", "error", "warning", "info", "log", "debug"];
+var logData = {
+  level: "warning",
+  customFn: null
+};
+var setLogLevel = (logLevel) => {
+  logData.level = logLevel;
+};
+var setCustomLogHandler = (customFn) => {
+  logData.customFn = customFn;
+};
+var log = (type, ...logArgs) => {
+  if (logLevelOrder.indexOf(type) > logLevelOrder.indexOf(logData.level))
+    return;
+  if (logData.customFn) {
+    logData.customFn(type, ...logArgs);
+    return;
+  }
+  if (type === "error")
+    console.error(...logArgs);
+  if (type === "warning")
+    console.warn(...logArgs);
+  if (type === "info")
+    console.info(...logArgs);
+  if (type === "log")
+    console.log(...logArgs);
+  if (type === "debug")
+    console.debug(...logArgs);
+};
+var checkForWarnings = (fnName, identifier) => {
+  const autoDetect2 = getAutoDetectFromCache();
+  if (autoDetect2.length > 1 && !identifier) {
+    log("warning", `No identifier was provided to '${fnName}' but there are multiple cameras connected. This may cause unexpected results.`);
+  }
+};
+
+// src/utils/runCmd.ts
+var ProcessPromise = class extends Promise {
+  constructor(executor) {
+    let process2;
+    super((resolve, reject) => {
+      process2 = executor(resolve, reject);
+    });
+    this.process = process2;
+  }
+};
+var ignorableErrors = ["out of focus"];
+var runCmdUnqueued = (cmd, dir, skipErrorReporting = false) => new ProcessPromise((resolve, reject) => {
+  log("debug", `cmd: ${cmd}`);
+  return exec(
+    cmd,
+    {
+      cwd: dir || process.cwd()
+    },
+    async (err, stdout, stderr) => {
+      if (err) {
+        const shortMsg = parseShortErrorMessage(stderr);
+        if (ignorableErrors.includes(shortMsg.toLowerCase())) {
+          return resolve("");
+        }
+        if (!skipErrorReporting && errorHandling.handler) {
+          const doResolve = await errorHandling.handler(shortMsg, stderr);
+          if (doResolve) {
+            return resolve("");
+          } else {
+            return reject(shortMsg || stderr);
+          }
+        }
+        return reject(shortMsg || stderr);
+      }
+      return resolve(stdout);
+    }
+  );
+});
+var runCmd = (cmd, identifier, dir, skipErrorReporting) => addToQueue(cmd, identifier, () => runCmdUnqueued(cmd, dir, skipErrorReporting));
 
 // src/utils/configUtils.ts
 import { ObjectUtils as ObjectUtils2 } from "swiss-ak";
@@ -355,6 +384,7 @@ var getMultipleConfigInfoAndValues = async (keys, identifier) => {
 
 // src/commands/config.ts
 var list = async (identifier) => {
+  checkForWarnings("config.list", identifier);
   const cached = getConfigKeyListFromCache(identifier);
   if (cached)
     return cached;
@@ -364,6 +394,7 @@ var list = async (identifier) => {
   return lines;
 };
 var findAppropriateConfigKeys = async (keys, identifier) => {
+  checkForWarnings("config.findAppropriateConfigKeys", identifier);
   const allKeys = await list(identifier);
   return keys.map((key) => {
     if (allKeys.includes(key))
@@ -378,6 +409,7 @@ var findAppropriateConfigKeys = async (keys, identifier) => {
   });
 };
 var getAll = async (identifier) => {
+  checkForWarnings("config.getAll", identifier);
   const pairs = await getAllConfigInfoAndValues(identifier);
   const valuesEntries = pairs.map(([value, info]) => [info.key, value]);
   const infoEntries = pairs.map(([value, info]) => [info.key, info]);
@@ -387,16 +419,19 @@ var getAll = async (identifier) => {
   };
 };
 var getAllInfo = async (identifier) => {
+  checkForWarnings("config.getAllInfo", identifier);
   const pairs = await getAllConfigInfoAndValues(identifier);
   const infoEntries = pairs.map(([value, info]) => [info.key, info]);
   return Object.fromEntries(infoEntries);
 };
 var getAllValues = async (identifier) => {
+  checkForWarnings("config.getAllValues", identifier);
   const pairs = await getAllConfigInfoAndValues(identifier);
   const valuesEntries = pairs.map(([value, info]) => [info.key, value]);
   return Object.fromEntries(valuesEntries);
 };
 var get = async (keys, checkIfMissing = false, identifier) => {
+  checkForWarnings("config.get", identifier);
   const checked = await filterOutMissingKeys(identifier, keys, checkIfMissing);
   const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
   const valuesEntries = pairs.map(([value, info]) => [info.key, value]);
@@ -407,20 +442,24 @@ var get = async (keys, checkIfMissing = false, identifier) => {
   };
 };
 var getInfo = async (keys, checkIfMissing = false, identifier) => {
+  checkForWarnings("config.getInfo", identifier);
   const checked = await filterOutMissingKeys(identifier, keys, checkIfMissing);
   const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
   return Object.fromEntries(pairs.map(([value, info]) => [info.key, info]));
 };
 var getValuesAsObj = async (keys, checkIfMissing = false, identifier) => {
+  checkForWarnings("config.getValuesAsObj", identifier);
   const checked = await filterOutMissingKeys(identifier, keys, checkIfMissing);
   const pairs = await getMultipleConfigInfoAndValues(checked, identifier);
   return Object.fromEntries(pairs.map(([value, info]) => [info.key, value]));
 };
 var getValues = async (keys, checkIfMissing = false, identifier) => {
+  checkForWarnings("config.getValues", identifier);
   const valuesObj = await getValuesAsObj(keys, checkIfMissing, identifier);
   return keys.map((key) => valuesObj[key]);
 };
 var setValues = async (values, checkIfMissing = false, identifier) => {
+  checkForWarnings("config.setValues", identifier);
   const checked = await filterOutMissingProps(identifier, values, checkIfMissing);
   const keys = Object.keys(checked);
   const cached = getMultipleFromConfigInfoCache(keys, identifier);
@@ -537,6 +576,7 @@ var getOpenPort = async (port = getRandomPort()) => {
   return getOpenPort(port + 1);
 };
 var liveview = async (cb, autoStart = false, identifier) => addToQueueSimple("liveview", identifier, async () => {
+  checkForWarnings("liveview", identifier);
   let capture;
   let response;
   let stopPromise = null;
@@ -635,6 +675,7 @@ var liveview = async (cb, autoStart = false, identifier) => addToQueueSimple("li
 
 // src/commands/capture.ts
 var image = async (options = {}, identifier) => {
+  checkForWarnings("capture.image", identifier);
   const mainFlag = options.download !== false ? "--capture-image-and-download" : "--capture-image";
   const flags = getFlags(options);
   const cmd = `gphoto2 ${getIdentifierFlags(identifier)} ${mainFlag} ${flags} --force-overwrite`;
@@ -643,6 +684,7 @@ var image = async (options = {}, identifier) => {
   return parseCaptureStdout(out, options.directory);
 };
 var preview = async (options = {}, identifier) => {
+  checkForWarnings("capture.preview", identifier);
   let opts = options;
   if (options.filename) {
     opts = { ...options, filename: options.filename.replace(/%C/g, "jpg") };
@@ -714,6 +756,7 @@ var parseAbilitiesTable = (out) => {
   return result;
 };
 var abilities = async (identifier) => {
+  checkForWarnings("abilities", identifier);
   const out = await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --abilities `, identifier);
   return parseAbilitiesTable(out);
 };
@@ -739,6 +782,7 @@ import { PromiseUtils } from "swiss-ak";
 var autoDetect = async () => {
   const out = await runCmdUnqueued("gphoto2 --auto-detect");
   const cameras = readTable(out, ["model", "port"]);
+  setAutoDetectInCache(cameras);
   return cameras;
 };
 var getSerial = async (identifier) => {
@@ -764,6 +808,7 @@ var findBestAFMode = (info, initial) => {
   return info.choices.find((choice) => choice.toLowerCase().startsWith("af-s")) || info.choices.find((choice) => choice.toLowerCase().startsWith("af")) || info.choices.find((choice) => choice.toLowerCase().startsWith("a")) || initial;
 };
 var autofocus = async (overrideManual, identifier) => pauseLiveviewWrapper("autofocus", identifier, async () => {
+  checkForWarnings("autofocus", identifier);
   const keys = await findAppropriateConfigKeys(["focusmode", "focusmode2"], identifier);
   const [autofocusdriveKey] = await findAppropriateConfigKeys(["autofocusdrive"], identifier);
   let original = keys.map(() => void 0);
@@ -815,6 +860,7 @@ var listPorts = async () => {
 // src/commands/reset.ts
 import { wait as wait2 } from "swiss-ak";
 var reset = async (identifier) => {
+  checkForWarnings("reset", identifier);
   const serial = await getSerial(identifier);
   await runCmd(`gphoto2 ${getIdentifierFlags(identifier)} --reset`, identifier);
   const result = await getIdentifierForSerial(serial);
@@ -845,6 +891,7 @@ export {
   queue_public_exports as queue,
   reset,
   resetAll,
-  setDebugging,
-  setErrorHandler
+  setCustomLogHandler,
+  setErrorHandler,
+  setLogLevel
 };

@@ -31,8 +31,9 @@ gphoto
 - [listPorts](API.md#listports)
 - [reset](API.md#reset)
 - [resetAll](API.md#resetall)
-- [setDebugging](API.md#setdebugging)
+- [setCustomLogHandler](API.md#setcustomloghandler)
 - [setErrorHandler](API.md#seterrorhandler)
+- [setLogLevel](API.md#setloglevel)
 
 ### Interfaces
 
@@ -49,6 +50,7 @@ gphoto
 - [GPhotoConfigDataType](API.md#gphotoconfigdatatype)
 - [GPhotoConfigType](API.md#gphotoconfigtype)
 - [GPhotoErrorHandler](API.md#gphotoerrorhandler)
+- [GPhotoLogLevel](API.md#gphotologlevel)
 
 ## References
 
@@ -331,18 +333,20 @@ await gPhoto.resetAll(); // all cameras are disconnected and reconnected
 
 ___
 
-### setDebugging
+### setCustomLogHandler
 
-**setDebugging**(`debug`): `void`
+**setCustomLogHandler**(`customFn`): `void`
 
-Turn on debugging mode, so that commands are printed as they are run.
-Useful for debugging.
+Set a custom function to handle logging.
+
+If set, this function will be called instead of the default logging.
+This will still abide by the log level set.
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `debug` | `boolean` |
+| `customFn` | (`type`: [`GPhotoLogLevel`](API.md#gphotologlevel), ...`logArgs`: `any`[]) => `void` |
 
 #### Returns
 
@@ -367,6 +371,32 @@ It can be async.
 | Name | Type |
 | :------ | :------ |
 | `fn` | [`GPhotoErrorHandler`](API.md#gphotoerrorhandler) |
+
+#### Returns
+
+`void`
+
+___
+
+### setLogLevel
+
+**setLogLevel**(`logLevel`): `void`
+
+Set the level of logging to use.
+
+Supported levels:
+- none: No logging
+- error: Only errors
+- warning: Errors and warnings (default)
+- info: Errors, warnings and info
+- log: Errors, warnings, info and log
+- debug: Errors, warnings, info, log and debug
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `logLevel` | [`GPhotoLogLevel`](API.md#gphotologlevel) |
 
 #### Returns
 
@@ -425,3 +455,19 @@ Can be async.
 ##### Returns
 
 `Promise`<`boolean`\> \| `boolean`
+
+___
+
+### GPhotoLogLevel
+
+ **GPhotoLogLevel**: ``"none"`` \| ``"error"`` \| ``"warning"`` \| ``"info"`` \| ``"log"`` \| ``"debug"``
+
+An indication of what level of logging to use.
+
+Supported levels:
+- none: No logging
+- error: Only errors
+- warning: Errors and warnings (default)
+- info: Errors, warnings and info
+- log: Errors, warnings, info and log
+- debug: Errors, warnings, info, log and debug
