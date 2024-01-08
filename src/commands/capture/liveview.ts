@@ -154,6 +154,8 @@ export const liveview = async (cb: (frame: Buffer) => void, autoStart: boolean =
       }
 
       await stopPromise.promise; // wait for the process to close
+
+      // TODO run --get-config "something" to force the mirror to close
     };
 
     const result = { start, stop, isRunning };
